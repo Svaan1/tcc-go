@@ -1,4 +1,4 @@
 server:
-	go run cdm/server/main.go
+	go run cmd/server/main.go
 client:
-	go run cdm/client/main.go
+	go run cmd/client/main.go

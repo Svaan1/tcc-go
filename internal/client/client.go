@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"net"
 	"time"
 
@@ -31,9 +32,13 @@ func New() *Client {
 	}
 }
 
-func (c *Client) Connect(name string, codecs []string) error {
-	conn, err := net.Dial(c.Config.Network, c.Config.Address)
+func (c *Client) Connect(ctx context.Context, name string, codecs []string) error {
+	ctx, cancel := context.WithCancel(ctx)
+
+	var d net.Dialer
+	conn, err := d.DialContext(ctx, c.Config.Network, c.Config.Address)
 	if err != nil {
+		cancel()
 		return err
 	}
 
@@ -42,8 +47,8 @@ func (c *Client) Connect(name string, codecs []string) error {
 	register := protocols.NewRegisterPacket(name, codecs)
 	protocols.SendPacket(&conn, *register)
 
-	go c.handleServerMessages()
-	go c.handleResourceUsagePolling()
+	go c.handleServerMessages(ctx, cancel)
+	go c.handleResourceUsagePolling(ctx)
 
 	return nil
 }

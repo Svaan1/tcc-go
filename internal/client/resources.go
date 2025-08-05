@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -37,30 +38,37 @@ func GetDisk() (float64, error) {
 	return stat.UsedPercent, nil
 }
 
-func (c *Client) handleResourceUsagePolling() {
+func (c *Client) handleResourceUsagePolling(ctx context.Context) {
+	ticker := time.NewTicker(c.Config.ResourceUsagePollingTickTime)
+	defer ticker.Stop()
+
 	for {
-		cpu, err := GetCPU()
-		if err != nil {
-			log.Println("Failed to get CPU usage", err)
-		}
-		mem, err := GetMemory()
-		if err != nil {
-			log.Println("Failed to get Memory usage", err)
-		}
-		disk, err := GetDisk()
-		if err != nil {
-			log.Println("Failed to get Disk usage", err)
-		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			cpu, err := GetCPU()
+			if err != nil {
+				log.Println("Failed to get CPU usage", err)
+			}
+			mem, err := GetMemory()
+			if err != nil {
+				log.Println("Failed to get Memory usage", err)
+			}
+			disk, err := GetDisk()
+			if err != nil {
+				log.Println("Failed to get Disk usage", err)
+			}
 
-		now := time.Now()
+			now := time.Now()
 
-		resourceUsage := protocols.NewResourceUsagePacket(cpu, mem, disk, now)
-		err = protocols.SendPacket(c.conn, *resourceUsage)
-		if err != nil {
-			log.Println("Failed to send resource usage packet", err)
-			continue
+			resourceUsage := protocols.NewResourceUsagePacket(cpu, mem, disk, now)
+			err = protocols.SendPacket(c.conn, *resourceUsage)
+			if err != nil {
+				log.Println("Failed to send resource usage packet", err)
+				continue
+			}
+
 		}
-
-		time.Sleep(c.Config.ResourceUsagePollingTickTime)
 	}
 }
