@@ -2,6 +2,7 @@ package server
 
 import (
 	"net"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -9,12 +10,14 @@ import (
 type ServerConfig struct {
 	Network string
 	Address string
+
+	ResourceUsagePollingTimeout time.Duration
 }
 
 type Server struct {
 	Config   ServerConfig
 	listener *net.Listener
-	nodes    map[uuid.UUID]Node
+	nodes    map[uuid.UUID]*Node
 }
 
 func New() *Server {
@@ -22,9 +25,11 @@ func New() *Server {
 		Config: ServerConfig{
 			Network: "tcp",
 			Address: "localhost:8081",
+
+			ResourceUsagePollingTimeout: 10 * time.Second,
 		},
 		listener: nil,
-		nodes:    map[uuid.UUID]Node{},
+		nodes:    map[uuid.UUID]*Node{},
 	}
 }
 

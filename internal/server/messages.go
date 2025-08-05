@@ -10,20 +10,24 @@ func (sv *Server) handleClientMessages(node *Node) {
 	defer sv.closeConnection(node)
 
 	for {
-		packet, err := protocols.ReceivePacket(node.Conn)
-		if err != nil {
-			log.Println("Failed to receive packet, closing connection", err)
+		select {
+		case <-node.closedChan:
 			return
-		}
-
-		switch packet.Type {
-		case protocols.ResourceUsageType:
-			protocols.NewResourceUsageFromPacketData(packet.Data)
-
 		default:
-			log.Println("Received invalid packet type, closing connection", packet.Type)
-			return
-		}
+			packet, err := protocols.ReceivePacket(node.conn)
+			if err != nil {
+				log.Println("Failed to receive packet, closing connection", err)
+				return
+			}
 
+			switch packet.Type {
+			case protocols.ResourceUsageType:
+				node.ResourceUsage = *protocols.NewResourceUsageFromPacketData(packet.Data)
+
+			default:
+				log.Println("Received invalid packet type, closing connection", packet.Type)
+				return
+			}
+		}
 	}
 }
