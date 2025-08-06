@@ -8,10 +8,10 @@ import (
 const ResourceUsageType string = "resource_usage"
 
 type ResourceUsage struct {
-	CPU    float64
-	Memory float64
-	Disk   float64
-	Time   time.Time
+	CPU    float64   `json:"cpu"`
+	Memory float64   `json:"memory"`
+	Disk   float64   `json:"disk"`
+	Time   time.Time `json:"time"`
 }
 
 func NewResourceUsagePacket(cpu float64, memory float64, disk float64, time time.Time) *Packet {

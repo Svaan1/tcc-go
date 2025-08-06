@@ -2,19 +2,26 @@ package main
 
 import (
 	"log"
+	"net/http"
 
+	"github.com/svaan1/go-tcc/internal/api"
 	"github.com/svaan1/go-tcc/internal/server"
 )
 
 func main() {
-	server := server.New()
+	sv := server.New()
 
-	err := server.Listen()
+	log.Printf("Starting %s connection at %s", sv.Config.Network, sv.Config.Address)
+
+	err := sv.Listen()
 	if err != nil {
 		log.Fatalf("Failed to start server %v", err)
 	}
 
-	log.Printf("Server started a %s connection at %s", server.Config.Network, server.Config.Address)
+	log.Println("Starting API server at localhost:8082")
 
-	select {}
+	handlers := api.NewHandlers(sv)
+	http.HandleFunc("/nodes", handlers.GetNodes)
+
+	log.Fatal(http.ListenAndServe(":8082", nil))
 }

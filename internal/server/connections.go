@@ -11,14 +11,14 @@ import (
 )
 
 type Node struct {
-	ID         uuid.UUID
-	Name       string
-	Codecs     []string
+	ID            uuid.UUID               `json:"id"`
+	Name          string                  `json:"name"`
+	Codecs        []string                `json:"codecs"`
+	ResourceUsage protocols.ResourceUsage `json:"resourceUsage"`
+
 	conn       *net.Conn
 	closedOnce sync.Once
 	closedChan chan struct{}
-
-	ResourceUsage protocols.ResourceUsage
 }
 
 func (sv *Server) handleConnections() {
@@ -61,7 +61,7 @@ func (sv *Server) handleConnections() {
 				Time: time.Now(),
 			},
 		}
-		sv.nodes[node.ID] = node
+		sv.Nodes[node.ID] = node
 
 		go sv.handleClientMessages(node)
 		go sv.handleResourceUsagePolling(node)
@@ -73,7 +73,7 @@ func (sv *Server) handleConnections() {
 func (sv *Server) closeConnection(node *Node) {
 	node.closedOnce.Do(func() {
 		(*node.conn).Close()
-		delete(sv.nodes, node.ID)
+		delete(sv.Nodes, node.ID)
 		close(node.closedChan)
 		log.Printf("Node disconnected %s", node.ID)
 	})

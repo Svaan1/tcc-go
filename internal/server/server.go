@@ -16,8 +16,8 @@ type ServerConfig struct {
 
 type Server struct {
 	Config   ServerConfig
+	Nodes    map[uuid.UUID]*Node
 	listener *net.Listener
-	nodes    map[uuid.UUID]*Node
 }
 
 func New() *Server {
@@ -28,8 +28,8 @@ func New() *Server {
 
 			ResourceUsagePollingTimeout: 10 * time.Second,
 		},
+		Nodes:    map[uuid.UUID]*Node{},
 		listener: nil,
-		nodes:    map[uuid.UUID]*Node{},
 	}
 }
 
@@ -44,4 +44,13 @@ func (sv *Server) Listen() error {
 	go sv.handleConnections()
 
 	return nil
+}
+
+func (sv *Server) GetNodes() []*Node {
+	nodes := make([]*Node, 0, len(sv.Nodes))
+	for _, v := range sv.Nodes {
+		nodes = append(nodes, v)
+	}
+
+	return nodes
 }
