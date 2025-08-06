@@ -1,8 +1,10 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -17,6 +19,7 @@ type Node struct {
 	ResourceUsage protocols.ResourceUsage `json:"resourceUsage"`
 
 	conn       *net.Conn
+	logger     *log.Logger
 	closedOnce sync.Once
 	closedChan chan struct{}
 }
@@ -52,10 +55,12 @@ func (sv *Server) handleConnections() {
 		}
 
 		node := &Node{
-			ID:         uuid.New(),
-			Name:       register.Name,
-			Codecs:     register.Codecs,
+			ID:     uuid.New(),
+			Name:   register.Name,
+			Codecs: register.Codecs,
+
 			conn:       &conn,
+			logger:     log.New(os.Stdout, fmt.Sprintf("[%s] ", register.Name), log.LstdFlags),
 			closedChan: make(chan struct{}),
 			ResourceUsage: protocols.ResourceUsage{
 				Time: time.Now(),
@@ -66,7 +71,7 @@ func (sv *Server) handleConnections() {
 		go sv.handleClientMessages(node)
 		go sv.handleResourceUsagePolling(node)
 
-		log.Println("Node registered", node)
+		node.logger.Printf("Node registered")
 	}
 }
 
@@ -75,6 +80,6 @@ func (sv *Server) closeConnection(node *Node) {
 		(*node.conn).Close()
 		delete(sv.Nodes, node.ID)
 		close(node.closedChan)
-		log.Printf("Node disconnected %s", node.ID)
+		node.logger.Print("Node disconnected")
 	})
 }

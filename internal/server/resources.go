@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"time"
 )
 
@@ -15,7 +14,7 @@ func (sv *Server) handleResourceUsagePolling(node *Node) {
 			return
 		case <-ticker.C:
 			if time.Since(node.ResourceUsage.Time) > sv.Config.ResourceUsagePollingTimeout {
-				log.Printf("Node %d resource usage timed out", node.ID)
+				node.logger.Printf("Node resource usage timed out")
 				sv.closeConnection(node)
 				return
 			}
