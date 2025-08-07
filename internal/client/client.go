@@ -20,11 +20,11 @@ type Client struct {
 	conn   *net.Conn
 }
 
-func New() *Client {
+func New(address string) *Client {
 	return &Client{
 		Config: ClientConfig{
 			Network: "tcp",
-			Address: "localhost:8081",
+			Address: address,
 
 			ResourceUsagePollingTickTime: 5 * time.Second,
 		},

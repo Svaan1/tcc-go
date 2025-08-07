@@ -2,26 +2,37 @@ package main
 
 import (
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/svaan1/go-tcc/internal/api"
 	"github.com/svaan1/go-tcc/internal/server"
+	"github.com/svaan1/go-tcc/pkg/utils"
+)
+
+var (
+	tcpPort  = utils.GetEnv("TCP_PORT", "8080")
+	httpPort = utils.GetEnv("HTTP_PORT", "8081")
 )
 
 func main() {
-	sv := server.New()
+	tcpAddress := net.JoinHostPort("", tcpPort)
+	httpAddress := net.JoinHostPort("", httpPort)
 
-	log.Printf("Starting %s connection at %s", sv.Config.Network, sv.Config.Address)
+	log.Printf("Starting TCP server at %s", tcpAddress)
+	sv := server.New(tcpAddress)
 
 	err := sv.Listen()
 	if err != nil {
 		log.Fatalf("Failed to start server %v", err)
 	}
 
-	log.Println("Starting API server at localhost:8082")
+	log.Printf("Starting HTTP server at %s", httpAddress)
 
 	handlers := api.NewHandlers(sv)
 	http.HandleFunc("/nodes", handlers.GetNodes)
 
-	log.Fatal(http.ListenAndServe(":8082", nil))
+	if err := http.ListenAndServe(httpAddress, nil); err != nil {
+		log.Fatalf("Failed to start HTTP server %v", err)
+	}
 }

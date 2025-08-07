@@ -20,11 +20,11 @@ type Server struct {
 	listener *net.Listener
 }
 
-func New() *Server {
+func New(address string) *Server {
 	return &Server{
 		Config: ServerConfig{
 			Network: "tcp",
-			Address: "localhost:8081",
+			Address: address,
 
 			ResourceUsagePollingTimeout: 10 * time.Second,
 		},

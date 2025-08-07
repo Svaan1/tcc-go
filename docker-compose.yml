@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/server.Dockerfile
+    networks:
+      - tcc-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nodes"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    environment:
+      - TCP_PORT=8080
+      - HTTP_PORT=8081
+    ports:
+      - 8081:8081
+
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/client.Dockerfile
+    networks:
+      - tcc-network
+    depends_on:
+      - server
+    restart: unless-stopped
+    environment:
+      - SERVER_ADDRESS=server:8080
+
+networks:
+  tcc-network:
+    driver: bridge
