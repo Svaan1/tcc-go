@@ -19,13 +19,13 @@ func main() {
 	tcpAddress := net.JoinHostPort("", tcpPort)
 	httpAddress := net.JoinHostPort("", httpPort)
 
-	log.Printf("Starting TCP server at %s", tcpAddress)
 	sv := server.New(tcpAddress)
 
-	err := sv.Listen()
-	if err != nil {
-		log.Fatalf("Failed to start server %v", err)
-	}
+	go func() {
+		if err := sv.Serve(); err != nil {
+			log.Fatalf("TCP server failed: %v", err)
+		}
+	}()
 
 	log.Printf("Starting HTTP server at %s", httpAddress)
 

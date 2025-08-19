@@ -1,10 +1,14 @@
 package server
 
 import (
+	"fmt"
+	"log"
 	"net"
 	"time"
 
 	"github.com/google/uuid"
+	pb "github.com/svaan1/go-tcc/internal/transcoding"
+	"google.golang.org/grpc"
 )
 
 type ServerConfig struct {
@@ -15,6 +19,8 @@ type ServerConfig struct {
 }
 
 type Server struct {
+	pb.VideoTranscodingServer
+
 	Config   ServerConfig
 	Nodes    map[uuid.UUID]*Node
 	listener *net.Listener
@@ -31,17 +37,26 @@ func New(address string) *Server {
 		Nodes:    map[uuid.UUID]*Node{},
 		listener: nil,
 	}
+
 }
 
-func (sv *Server) Listen() error {
+func (sv *Server) Serve() error {
 	listener, err := net.Listen(sv.Config.Network, sv.Config.Address)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to listen on %s %s: %w", sv.Config.Network, sv.Config.Address, err)
 	}
 
 	sv.listener = &listener
 
-	go sv.handleConnections()
+	log.Printf("Server listening on %s %s", sv.Config.Network, sv.Config.Address)
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterVideoTranscodingServer(grpcServer, sv)
+
+	log.Println("Starting gRPC server...")
+	if err := grpcServer.Serve(listener); err != nil {
+		return fmt.Errorf("failed to serve gRPC server: %w", err)
+	}
 
 	return nil
 }

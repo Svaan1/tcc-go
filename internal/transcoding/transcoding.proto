@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package transcoding;
+
+option go_package = "github.com/svaan1/go-tcc/internal/transcoding";
+
+import "google/protobuf/timestamp.proto";
+
+// VideoTranscoding service with separate client and node interfaces
+service VideoTranscoding {
+  // Node-facing RPC
+  // Stream establishes a bidirectional communication channel between orchestrator and nodes
+  rpc Stream(stream NodeMessage) returns (stream OrchestratorMessage);
+
+  // Client-facing RPCs
+  // GetAvailableNodes returns a list of currently registered nodes (for HTTP API compatibility)
+  rpc GetAvailableNodes(GetNodesRequest) returns (GetNodesResponse);
+  // RequestEncoding allows clients to submit encoding jobs to the orchestrator
+  rpc RequestEncoding(EncodingRequest) returns (EncodingResponse);
+}
+
+message MessageBase {
+  string message_id = 1; // Unique identifier for request/response correlation
+  google.protobuf.Timestamp timestamp = 2;
+}
+
+// Messages sent FROM nodes TO orchestrator
+message NodeMessage {
+  MessageBase base = 1;
+  
+  oneof payload {
+    // Node registration
+    RegisterRequest register_request = 2;
+    
+    // Resource usage monitoring
+    ResourceUsageRequest resource_usage_request = 3;
+    
+    // Job assignment response
+    JobAssignmentResponse job_assignment_response = 4;
+    
+    // Node disconnection
+    DisconnectRequest disconnect_request = 5;
+  }
+}
+
+// Messages sent FROM orchestrator TO nodes
+message OrchestratorMessage {
+  MessageBase base = 1;
+  
+  oneof payload {
+    // Node registration response
+    RegisterResponse register_response = 2;
+    
+    // Resource usage acknowledgment
+    ResourceUsageResponse resource_usage_response = 3;
+    
+    // Job assignment from orchestrator to node
+    JobAssignmentRequest job_assignment_request = 4;
+    
+    // Disconnect acknowledgment
+    DisconnectResponse disconnect_response = 7;
+  }
+}
+
+message RegisterRequest {
+  string name = 1;
+  repeated string codecs = 2;
+}
+
+message RegisterResponse {
+  string node_id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message ResourceUsageRequest {
+  string node_id = 1;
+  double cpu_percent = 2;
+  double memory_percent = 3;
+  double disk_percent = 4;
+}
+
+message ResourceUsageResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message JobAssignmentRequest {
+  string job_id = 1;
+  string input_path = 2;
+  string output_path = 3;
+  string crf = 4;
+  string preset = 5;
+  string audio_codec = 6;
+  string video_codec = 7;
+}
+
+message JobAssignmentResponse {
+  string job_id = 1;
+  bool accepted = 2;
+  string message = 3;
+}
+
+message DisconnectRequest {
+  string node_id = 1;
+  string reason = 2;
+}
+
+message DisconnectResponse {
+  bool acknowledged = 1;
+}
+
+message EncodingRequest {
+  string input_path = 1;
+  string output_path = 2;
+  string crf = 3;
+  string preset = 4;
+  string audio_codec = 5;
+  string video_codec = 6;
+}
+
+message EncodingResponse {
+  string job_id = 1;
+  bool accepted = 2;
+  string message = 3;
+}
+
+message GetNodesRequest {}
+
+message GetNodesResponse {
+  repeated NodeInfo nodes = 1;
+}
+
+message NodeInfo {
+  string id = 1;
+  string name = 2;
+  repeated string codecs = 3;
+  ResourceUsageRequest last_resource_usage = 4;
+  google.protobuf.Timestamp registered_at = 5;
+  NodeStatus status = 6;
+}
+
+enum NodeStatus {
+  NODE_STATUS_UNSPECIFIED = 0;
+  NODE_STATUS_ONLINE = 1;
+  NODE_STATUS_BUSY = 2;
+  NODE_STATUS_OFFLINE = 3;
+}

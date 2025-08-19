@@ -4,8 +4,6 @@ import (
 	"context"
 	"net"
 	"time"
-
-	"github.com/svaan1/go-tcc/internal/protocols"
 )
 
 type ClientConfig struct {
