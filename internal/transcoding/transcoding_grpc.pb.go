@@ -19,25 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	VideoTranscoding_Stream_FullMethodName            = "/transcoding.VideoTranscoding/Stream"
-	VideoTranscoding_GetAvailableNodes_FullMethodName = "/transcoding.VideoTranscoding/GetAvailableNodes"
-	VideoTranscoding_RequestEncoding_FullMethodName   = "/transcoding.VideoTranscoding/RequestEncoding"
+	VideoTranscoding_Stream_FullMethodName = "/transcoding.VideoTranscoding/Stream"
 )
 
 // VideoTranscodingClient is the client API for VideoTranscoding service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// VideoTranscoding service with separate client and node interfaces
 type VideoTranscodingClient interface {
-	// Node-facing RPC
 	// Stream establishes a bidirectional communication channel between orchestrator and nodes
 	Stream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[NodeMessage, OrchestratorMessage], error)
-	// Client-facing RPCs
-	// GetAvailableNodes returns a list of currently registered nodes (for HTTP API compatibility)
-	GetAvailableNodes(ctx context.Context, in *GetNodesRequest, opts ...grpc.CallOption) (*GetNodesResponse, error)
-	// RequestEncoding allows clients to submit encoding jobs to the orchestrator
-	RequestEncoding(ctx context.Context, in *EncodingRequest, opts ...grpc.CallOption) (*EncodingResponse, error)
 }
 
 type videoTranscodingClient struct {
@@ -61,40 +51,12 @@ func (c *videoTranscodingClient) Stream(ctx context.Context, opts ...grpc.CallOp
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type VideoTranscoding_StreamClient = grpc.BidiStreamingClient[NodeMessage, OrchestratorMessage]
 
-func (c *videoTranscodingClient) GetAvailableNodes(ctx context.Context, in *GetNodesRequest, opts ...grpc.CallOption) (*GetNodesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetNodesResponse)
-	err := c.cc.Invoke(ctx, VideoTranscoding_GetAvailableNodes_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *videoTranscodingClient) RequestEncoding(ctx context.Context, in *EncodingRequest, opts ...grpc.CallOption) (*EncodingResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(EncodingResponse)
-	err := c.cc.Invoke(ctx, VideoTranscoding_RequestEncoding_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // VideoTranscodingServer is the server API for VideoTranscoding service.
 // All implementations must embed UnimplementedVideoTranscodingServer
 // for forward compatibility.
-//
-// VideoTranscoding service with separate client and node interfaces
 type VideoTranscodingServer interface {
-	// Node-facing RPC
 	// Stream establishes a bidirectional communication channel between orchestrator and nodes
 	Stream(grpc.BidiStreamingServer[NodeMessage, OrchestratorMessage]) error
-	// Client-facing RPCs
-	// GetAvailableNodes returns a list of currently registered nodes (for HTTP API compatibility)
-	GetAvailableNodes(context.Context, *GetNodesRequest) (*GetNodesResponse, error)
-	// RequestEncoding allows clients to submit encoding jobs to the orchestrator
-	RequestEncoding(context.Context, *EncodingRequest) (*EncodingResponse, error)
 	mustEmbedUnimplementedVideoTranscodingServer()
 }
 
@@ -107,12 +69,6 @@ type UnimplementedVideoTranscodingServer struct{}
 
 func (UnimplementedVideoTranscodingServer) Stream(grpc.BidiStreamingServer[NodeMessage, OrchestratorMessage]) error {
 	return status.Errorf(codes.Unimplemented, "method Stream not implemented")
-}
-func (UnimplementedVideoTranscodingServer) GetAvailableNodes(context.Context, *GetNodesRequest) (*GetNodesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableNodes not implemented")
-}
-func (UnimplementedVideoTranscodingServer) RequestEncoding(context.Context, *EncodingRequest) (*EncodingResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RequestEncoding not implemented")
 }
 func (UnimplementedVideoTranscodingServer) mustEmbedUnimplementedVideoTranscodingServer() {}
 func (UnimplementedVideoTranscodingServer) testEmbeddedByValue()                          {}
@@ -142,58 +98,13 @@ func _VideoTranscoding_Stream_Handler(srv interface{}, stream grpc.ServerStream)
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type VideoTranscoding_StreamServer = grpc.BidiStreamingServer[NodeMessage, OrchestratorMessage]
 
-func _VideoTranscoding_GetAvailableNodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNodesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VideoTranscodingServer).GetAvailableNodes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: VideoTranscoding_GetAvailableNodes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VideoTranscodingServer).GetAvailableNodes(ctx, req.(*GetNodesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _VideoTranscoding_RequestEncoding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EncodingRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(VideoTranscodingServer).RequestEncoding(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: VideoTranscoding_RequestEncoding_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VideoTranscodingServer).RequestEncoding(ctx, req.(*EncodingRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // VideoTranscoding_ServiceDesc is the grpc.ServiceDesc for VideoTranscoding service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var VideoTranscoding_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "transcoding.VideoTranscoding",
 	HandlerType: (*VideoTranscodingServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetAvailableNodes",
-			Handler:    _VideoTranscoding_GetAvailableNodes_Handler,
-		},
-		{
-			MethodName: "RequestEncoding",
-			Handler:    _VideoTranscoding_RequestEncoding_Handler,
-		},
-	},
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Stream",

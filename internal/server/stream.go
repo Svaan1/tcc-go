@@ -3,27 +3,9 @@ package server
 import (
 	"io"
 	"log"
-	"time"
 
-	"github.com/google/uuid"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 )
-
-type ResourceUsage struct {
-	ResourceUsageRequest pb.ResourceUsageRequest
-	Timestamp            time.Time
-}
-
-type Node struct {
-	ID            uuid.UUID `json:"id"`
-	Name          string    `json:"name"`
-	Codecs        []string  `json:"codecs"`
-	ResourceUsage ResourceUsage
-
-	stream     *pb.VideoTranscoding_StreamServer
-	logger     *log.Logger
-	closedChan chan struct{}
-}
 
 func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	log.Printf("New stream connection established")
@@ -32,6 +14,13 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	if err != nil {
 		return err
 	}
+
+	defer func() {
+		sv.mu.Lock()
+		delete(sv.Nodes, node.ID)
+		sv.mu.Unlock()
+		log.Printf("Node %s (%s) disconnected", node.Name, node.ID.String())
+	}()
 
 	log.Printf("Starting message processing loop for node %s", node.Name)
 	for {
@@ -55,10 +44,7 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 
 			switch payload := msg.Payload.(type) {
 			case *pb.NodeMessage_ResourceUsageRequest:
-				log.Printf("Resource usage: CPU=%.2f%%, Memory=%.2f%%, Disk=%.2f%%",
-					payload.ResourceUsageRequest.CpuPercent,
-					payload.ResourceUsageRequest.MemoryPercent,
-					payload.ResourceUsageRequest.DiskPercent)
+				node.SetResourceUsage(payload.ResourceUsageRequest, msg.Base.Timestamp.AsTime())
 			case *pb.NodeMessage_JobAssignmentResponse:
 				log.Printf("Job assignment response: job_id=%s, accepted=%t, message=%s",
 					payload.JobAssignmentResponse.JobId,

@@ -6,17 +6,9 @@ option go_package = "github.com/svaan1/go-tcc/internal/transcoding";
 
 import "google/protobuf/timestamp.proto";
 
-// VideoTranscoding service with separate client and node interfaces
 service VideoTranscoding {
-  // Node-facing RPC
   // Stream establishes a bidirectional communication channel between orchestrator and nodes
   rpc Stream(stream NodeMessage) returns (stream OrchestratorMessage);
-
-  // Client-facing RPCs
-  // GetAvailableNodes returns a list of currently registered nodes (for HTTP API compatibility)
-  rpc GetAvailableNodes(GetNodesRequest) returns (GetNodesResponse);
-  // RequestEncoding allows clients to submit encoding jobs to the orchestrator
-  rpc RequestEncoding(EncodingRequest) returns (EncodingResponse);
 }
 
 message MessageBase {
@@ -108,41 +100,4 @@ message DisconnectRequest {
 
 message DisconnectResponse {
   bool acknowledged = 1;
-}
-
-message EncodingRequest {
-  string input_path = 1;
-  string output_path = 2;
-  string crf = 3;
-  string preset = 4;
-  string audio_codec = 5;
-  string video_codec = 6;
-}
-
-message EncodingResponse {
-  string job_id = 1;
-  bool accepted = 2;
-  string message = 3;
-}
-
-message GetNodesRequest {}
-
-message GetNodesResponse {
-  repeated NodeInfo nodes = 1;
-}
-
-message NodeInfo {
-  string id = 1;
-  string name = 2;
-  repeated string codecs = 3;
-  ResourceUsageRequest last_resource_usage = 4;
-  google.protobuf.Timestamp registered_at = 5;
-  NodeStatus status = 6;
-}
-
-enum NodeStatus {
-  NODE_STATUS_UNSPECIFIED = 0;
-  NODE_STATUS_ONLINE = 1;
-  NODE_STATUS_BUSY = 2;
-  NODE_STATUS_OFFLINE = 3;
 }
