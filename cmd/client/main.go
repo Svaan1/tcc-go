@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/svaan1/go-tcc/internal/client"
 	"github.com/svaan1/go-tcc/pkg/utils"
@@ -18,7 +21,7 @@ var (
 func main() {
 	codecs := strings.Split(codecString, ";")
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
 	client := client.New(address)
 
 	err := client.Connect(ctx, name, codecs)
@@ -28,5 +31,17 @@ func main() {
 
 	log.Printf("Connected to server at %s", address)
 
-	select {}
+	// Set up graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case <-sigChan:
+		log.Println("Received shutdown signal, disconnecting...")
+		cancel()
+		client.Close()
+	case <-ctx.Done():
+		log.Println("Context cancelled, shutting down...")
+		client.Close()
+	}
 }

@@ -5,11 +5,11 @@ import (
 	"io"
 	"log"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ResourceUsage struct {
@@ -25,7 +25,6 @@ type Node struct {
 
 	stream     *pb.VideoTranscoding_StreamServer
 	logger     *log.Logger
-	closedOnce sync.Once
 	closedChan chan struct{}
 }
 
@@ -54,6 +53,24 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	}
 	sv.Nodes[node.ID] = node
 
+	registerResponse := &pb.OrchestratorMessage{
+		Base: &pb.MessageBase{
+			MessageId: "register-response-" + node.Name,
+			Timestamp: timestamppb.Now(),
+		},
+		Payload: &pb.OrchestratorMessage_RegisterResponse{
+			RegisterResponse: &pb.RegisterResponse{
+				NodeId:  node.ID.String(),
+				Success: true,
+				Message: "Registered successfuly.",
+			},
+		},
+	}
+
+	if err := stream.Send(registerResponse); err != nil {
+		return err
+	}
+
 	for {
 		msg, err := stream.Recv()
 		if err == io.EOF {
@@ -64,11 +81,5 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 		}
 
 		log.Print(msg)
-
-		orchestratorMsg := &pb.OrchestratorMessage{}
-
-		if err := stream.Send(orchestratorMsg); err != nil {
-			return err
-		}
 	}
 }

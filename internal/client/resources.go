@@ -8,7 +8,8 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
-	"github.com/svaan1/go-tcc/internal/protocols"
+	pb "github.com/svaan1/go-tcc/internal/transcoding"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func GetCPU() (float64, error) {
@@ -50,25 +51,45 @@ func (c *Client) handleResourceUsagePolling(ctx context.Context) {
 			cpu, err := GetCPU()
 			if err != nil {
 				log.Println("Failed to get CPU usage", err)
-			}
-			mem, err := GetMemory()
-			if err != nil {
-				log.Println("Failed to get Memory usage", err)
-			}
-			disk, err := GetDisk()
-			if err != nil {
-				log.Println("Failed to get Disk usage", err)
-			}
-
-			now := time.Now()
-
-			resourceUsage := protocols.NewResourceUsagePacket(cpu, mem, disk, now)
-			err = protocols.SendPacket(c.conn, *resourceUsage)
-			if err != nil {
-				log.Println("Failed to send resource usage packet", err)
 				continue
 			}
 
+			mem, err := GetMemory()
+			if err != nil {
+				log.Println("Failed to get Memory usage", err)
+				continue
+			}
+
+			disk, err := GetDisk()
+			if err != nil {
+				log.Println("Failed to get Disk usage", err)
+				continue
+			}
+
+			// Create resource usage message
+			resourceMsg := &pb.NodeMessage{
+				Base: &pb.MessageBase{
+					MessageId: "resource-usage-" + c.nodeID,
+					Timestamp: timestamppb.Now(),
+				},
+				Payload: &pb.NodeMessage_ResourceUsageRequest{
+					ResourceUsageRequest: &pb.ResourceUsageRequest{
+						NodeId:        c.nodeID,
+						CpuPercent:    cpu,
+						MemoryPercent: mem,
+						DiskPercent:   disk,
+					},
+				},
+			}
+
+			err = c.stream.Send(resourceMsg)
+			if err != nil {
+				log.Printf("Failed to send resource usage: %v", err)
+				continue
+			}
+
+			log.Printf("Sent resource usage: CPU=%.2f%%, Memory=%.2f%%, Disk=%.2f%%",
+				cpu, mem, disk)
 		}
 	}
 }
