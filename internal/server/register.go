@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"time"
@@ -12,32 +11,20 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type ResourceUsage struct {
-	ResourceUsageRequest pb.ResourceUsageRequest
-	Timestamp            time.Time
-}
-
-type Node struct {
-	ID            uuid.UUID `json:"id"`
-	Name          string    `json:"name"`
-	Codecs        []string  `json:"codecs"`
-	ResourceUsage ResourceUsage
-
-	stream     *pb.VideoTranscoding_StreamServer
-	logger     *log.Logger
-	closedChan chan struct{}
-}
-
-func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
+func (sv *Server) RegisterNode(stream pb.VideoTranscoding_StreamServer) (*Node, error) {
 	msg, err := stream.Recv()
 	if err != nil {
-		return err
+		log.Printf("Error receiving initial message: %v", err)
+		return nil, err
 	}
 
 	register := msg.GetRegisterRequest()
 	if register == nil {
-		return fmt.Errorf("expected RegisterRequest")
+		log.Printf("Invalid message: expected RegisterRequest but got different message type")
+		return nil, fmt.Errorf("expected RegisterRequest")
 	}
+
+	log.Printf("Processing registration request for node: %s with codecs: %v", register.Name, register.Codecs)
 
 	node := &Node{
 		ID:     uuid.New(),
@@ -52,6 +39,8 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 		closedChan: make(chan struct{}),
 	}
 	sv.Nodes[node.ID] = node
+
+	log.Printf("Node %s (%s) successfully registered with %d codecs", node.Name, node.ID.String(), len(node.Codecs))
 
 	registerResponse := &pb.OrchestratorMessage{
 		Base: &pb.MessageBase{
@@ -68,18 +57,10 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	}
 
 	if err := stream.Send(registerResponse); err != nil {
-		return err
+		log.Printf("Error sending registration response to node %s: %v", node.Name, err)
+		return nil, err
 	}
+	log.Printf("Registration response sent successfully to node %s", node.Name)
 
-	for {
-		msg, err := stream.Recv()
-		if err == io.EOF {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-
-		log.Print(msg)
-	}
+	return node, nil
 }
