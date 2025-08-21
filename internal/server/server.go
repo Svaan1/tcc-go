@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ServerConfig struct {
@@ -73,6 +74,35 @@ func (sv *Server) GetNodes() []*Node {
 	}
 
 	return nodes
+}
+
+func (sv *Server) AssignJob(input, output, crf, preset, audioCodec, videoCodec string) error {
+	job := pb.JobAssignmentRequest{
+		JobId:      uuid.NewString(),
+		InputPath:  input,
+		OutputPath: output,
+		Crf:        crf,
+		Preset:     preset,
+		AudioCodec: audioCodec,
+		VideoCodec: videoCodec,
+	}
+
+	msg := pb.OrchestratorMessage{
+		Base: &pb.MessageBase{
+			MessageId: "job-assignment-" + job.JobId,
+			Timestamp: timestamppb.Now(),
+		},
+		Payload: &pb.OrchestratorMessage_JobAssignmentRequest{
+			JobAssignmentRequest: &job,
+		},
+	}
+
+	for _, node := range sv.Nodes {
+		node.stream.Send(&msg)
+		return nil
+	}
+
+	return fmt.Errorf("no node available")
 }
 
 func (sv *Server) trackTimedOutNodes() {

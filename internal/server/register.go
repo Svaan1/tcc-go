@@ -34,8 +34,8 @@ func (sv *Server) RegisterNode(stream pb.VideoTranscoding_StreamServer) (*Node, 
 			Timestamp: time.Now(),
 		},
 
-		stream:     &stream,
 		logger:     log.New(os.Stdout, fmt.Sprintf("[%s] ", register.Name), log.LstdFlags),
+		stream:     stream,
 		closedChan: make(chan struct{}),
 	}
 	sv.Nodes[node.ID] = node

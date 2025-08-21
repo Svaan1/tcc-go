@@ -8,7 +8,7 @@ import (
 )
 
 func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
-	log.Printf("New stream connection established")
+	log.Printf("New connection established")
 
 	node, err := sv.RegisterNode(stream)
 	if err != nil {

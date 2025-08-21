@@ -20,8 +20,8 @@ type Node struct {
 	Codecs        []string  `json:"codecs"`
 	ResourceUsage ResourceUsage
 
-	stream     *pb.VideoTranscoding_StreamServer
 	logger     *log.Logger
+	stream     pb.VideoTranscoding_StreamServer
 	closedChan chan struct{}
 	closed     bool
 	mu         sync.Mutex
