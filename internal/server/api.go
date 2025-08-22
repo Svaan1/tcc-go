@@ -5,10 +5,12 @@ import (
 
 	"github.com/google/uuid"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (sv *Server) GetNodes() []*Node {
+	sv.mu.RLock()
+	defer sv.mu.RUnlock()
+
 	nodes := make([]*Node, 0, len(sv.Nodes))
 	for _, v := range sv.Nodes {
 		nodes = append(nodes, v)
@@ -18,7 +20,7 @@ func (sv *Server) GetNodes() []*Node {
 }
 
 func (sv *Server) AssignJob(input, output, crf, preset, audioCodec, videoCodec string) error {
-	job := pb.JobAssignmentRequest{
+	job := &pb.JobAssignmentRequest{
 		JobId:      uuid.NewString(),
 		InputPath:  input,
 		OutputPath: output,
@@ -28,18 +30,9 @@ func (sv *Server) AssignJob(input, output, crf, preset, audioCodec, videoCodec s
 		VideoCodec: videoCodec,
 	}
 
-	msg := pb.OrchestratorMessage{
-		Base: &pb.MessageBase{
-			MessageId: "job-assignment-" + job.JobId,
-			Timestamp: timestamppb.Now(),
-		},
-		Payload: &pb.OrchestratorMessage_JobAssignmentRequest{
-			JobAssignmentRequest: &job,
-		},
-	}
-
+	// temporary, just to assign to the first node
 	for _, node := range sv.Nodes {
-		node.stream.Send(&msg)
+		node.SendJobAssignmentRequest(job)
 		return nil
 	}
 

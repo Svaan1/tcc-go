@@ -26,7 +26,7 @@ type Server struct {
 	Nodes  map[uuid.UUID]*Node
 
 	listener *net.Listener
-	mu       sync.Mutex
+	mu       sync.RWMutex
 }
 
 func New(address string) *Server {

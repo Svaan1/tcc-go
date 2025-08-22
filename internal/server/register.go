@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/uuid"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (sv *Server) RegisterNode(stream pb.VideoTranscoding_StreamServer) (*Node, error) {
@@ -24,8 +23,6 @@ func (sv *Server) RegisterNode(stream pb.VideoTranscoding_StreamServer) (*Node, 
 		return nil, fmt.Errorf("expected RegisterRequest")
 	}
 
-	log.Printf("Processing registration request for node: %s with codecs: %v", register.Name, register.Codecs)
-
 	node := &Node{
 		ID:     uuid.New(),
 		Name:   register.Name,
@@ -38,29 +35,17 @@ func (sv *Server) RegisterNode(stream pb.VideoTranscoding_StreamServer) (*Node, 
 		stream:     stream,
 		closedChan: make(chan struct{}),
 	}
+
+	sv.mu.Lock()
 	sv.Nodes[node.ID] = node
+	sv.mu.Unlock()
 
-	log.Printf("Node %s (%s) successfully registered with %d codecs", node.Name, node.ID.String(), len(node.Codecs))
-
-	registerResponse := &pb.OrchestratorMessage{
-		Base: &pb.MessageBase{
-			MessageId: "register-response-" + node.Name,
-			Timestamp: timestamppb.Now(),
-		},
-		Payload: &pb.OrchestratorMessage_RegisterResponse{
-			RegisterResponse: &pb.RegisterResponse{
-				NodeId:  node.ID.String(),
-				Success: true,
-				Message: "Registered successfuly.",
-			},
-		},
-	}
-
-	if err := stream.Send(registerResponse); err != nil {
+	if err := node.SendRegisterResponse(); err != nil {
 		log.Printf("Error sending registration response to node %s: %v", node.Name, err)
 		return nil, err
 	}
-	log.Printf("Registration response sent successfully to node %s", node.Name)
+
+	log.Printf("Node %s (%s) successfully registered with %d codecs", node.Name, node.ID.String(), len(node.Codecs))
 
 	return node, nil
 }

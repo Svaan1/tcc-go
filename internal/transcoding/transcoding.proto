@@ -21,16 +21,9 @@ message NodeMessage {
   MessageBase base = 1;
   
   oneof payload {
-    // Node registration
     RegisterRequest register_request = 2;
-    
-    // Resource usage monitoring
     ResourceUsageRequest resource_usage_request = 3;
-    
-    // Job assignment response
     JobAssignmentResponse job_assignment_response = 4;
-    
-    // Node disconnection
     DisconnectRequest disconnect_request = 5;
   }
 }
@@ -40,16 +33,9 @@ message OrchestratorMessage {
   MessageBase base = 1;
   
   oneof payload {
-    // Node registration response
     RegisterResponse register_response = 2;
-    
-    // Resource usage acknowledgment
     ResourceUsageResponse resource_usage_response = 3;
-    
-    // Job assignment from orchestrator to node
     JobAssignmentRequest job_assignment_request = 4;
-    
-    // Disconnect acknowledgment
     DisconnectResponse disconnect_response = 7;
   }
 }

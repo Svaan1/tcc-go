@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/svaan1/go-tcc/internal/ffmpeg"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -35,4 +36,6 @@ func (c *Client) handleJobAssignment(ctx context.Context, jobRequest *pb.JobAssi
 	if err != nil {
 		log.Printf("Failed to send job response: %v", err)
 	}
+
+	ffmpeg.Encode(jobRequest)
 }

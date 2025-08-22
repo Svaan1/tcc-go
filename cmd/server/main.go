@@ -31,6 +31,7 @@ func main() {
 
 	handlers := api.NewHandlers(sv)
 	http.HandleFunc("/nodes", handlers.GetNodes)
+	http.HandleFunc("/job", handlers.AssignJob)
 
 	if err := http.ListenAndServe(httpAddress, nil); err != nil {
 		log.Fatalf("Failed to start HTTP server %v", err)

@@ -30,5 +30,7 @@ func (h *Handlers) GetNodes(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) AssignJob(w http.ResponseWriter, r *http.Request) {
+	h.sv.AssignJob("./samples/input.mp4", "./samples/output.mp4", "28", "slow", "aac", "libx264")
 
+	w.WriteHeader(http.StatusCreated)
 }
