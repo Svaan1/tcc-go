@@ -8,9 +8,9 @@ import (
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 )
 
-func (c *Client) handleServerMessages(ctx context.Context) {
+func (c *Client) handleStream(ctx context.Context) {
 	defer func() {
-		c.conn.Close()
+		c.Close()
 		log.Println("Server closed connection")
 	}()
 

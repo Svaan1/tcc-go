@@ -54,44 +54,15 @@ func (c *Client) Connect(ctx context.Context, name string, codecs []string) erro
 		return err
 	}
 
-	c.stream = stream
-
-	// Create register request message
-	registerMsg := &pb.NodeMessage{
-		Base: &pb.MessageBase{
-			MessageId: "register-" + name,
-			Timestamp: timestamppb.Now(),
-		},
-		Payload: &pb.NodeMessage_RegisterRequest{
-			RegisterRequest: &pb.RegisterRequest{
-				Name:   name,
-				Codecs: codecs,
-			},
-		},
-	}
-
-	err = stream.Send(registerMsg)
-	if err != nil {
+	if err := c.register(stream, name, codecs); err != nil {
+		log.Printf("Failed to register %v", err)
 		return err
 	}
 
-	// Wait for register response and get node ID
-	response, err := stream.Recv()
-	if err != nil {
-		return err
-	}
-
-	registerResponse := response.GetRegisterResponse()
-	if registerResponse == nil || !registerResponse.Success {
-		log.Printf("Registration failed: %s", registerResponse.GetMessage())
-		return err
-	}
-
-	c.nodeID = registerResponse.NodeId
-	log.Printf("Successfully registered as node ID: %s", c.nodeID)
+	log.Printf("Sucessfully registered as %s", c.nodeID)
 
 	// Start message and resource handling goroutines
-	go c.handleServerMessages(ctx)
+	go c.handleStream(ctx)
 	go c.handleResourceUsagePolling(ctx)
 
 	return nil
@@ -113,8 +84,7 @@ func (c *Client) Close() error {
 			},
 		}
 
-		err := c.stream.Send(disconnectMsg)
-		if err != nil {
+		if err := c.stream.Send(disconnectMsg); err != nil {
 			log.Printf("Failed to send disconnect message: %v", err)
 		}
 	}
@@ -122,5 +92,6 @@ func (c *Client) Close() error {
 	if c.conn != nil {
 		return c.conn.Close()
 	}
+
 	return nil
 }
