@@ -3,49 +3,43 @@ package grpcserver
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/svaan1/go-tcc/internal/app"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 )
 
-func (sv *Server) RegisterNode(stream pb.VideoTranscoding_StreamServer) (*Node, error) {
+func (sv *Server) RegisterNode(stream pb.VideoTranscoding_StreamServer) (*app.Node, *NodeConn, error) {
 	msg, err := stream.Recv()
 	if err != nil {
 		log.Printf("Error receiving initial message: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	register := msg.GetRegisterRequest()
 	if register == nil {
 		log.Printf("Invalid message: expected RegisterRequest but got different message type")
-		return nil, fmt.Errorf("expected RegisterRequest")
+		return nil, nil, fmt.Errorf("expected RegisterRequest")
 	}
 
-	node := &Node{
-		ID:     uuid.New(),
-		Name:   register.Name,
-		Codecs: register.Codecs,
-		ResourceUsage: ResourceUsage{
-			Timestamp: time.Now(),
-		},
-
-		logger:     log.New(os.Stdout, fmt.Sprintf("[%s] ", register.Name), log.LstdFlags),
-		stream:     stream,
-		closedChan: make(chan struct{}),
+	node, err := sv.App.RegisterNode(stream.Context(), register.Name, register.Codecs, time.Now())
+	if err != nil {
+		log.Printf("Error registering node: %v", err)
+		return nil, nil, err
 	}
+
+	nodeConn := newNodeConn(node.ID, stream)
 
 	sv.mu.Lock()
-	sv.Nodes[node.ID] = node
+	sv.NodeConns[node.ID] = nodeConn
 	sv.mu.Unlock()
 
-	if err := node.SendRegisterResponse(); err != nil {
+	if err := nodeConn.SendRegisterResponse(); err != nil {
 		log.Printf("Error sending registration response to node %s: %v", node.Name, err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	log.Printf("Node %s (%s) successfully registered with %d codecs", node.Name, node.ID.String(), len(node.Codecs))
 
-	return node, nil
+	return node, nodeConn, nil
 }

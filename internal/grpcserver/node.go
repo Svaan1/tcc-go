@@ -1,36 +1,30 @@
 package grpcserver
 
 import (
-	"log"
-	"sync"
-	"time"
-
 	"github.com/google/uuid"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type ResourceUsage struct {
-	ResourceUsageRequest *pb.ResourceUsageRequest
-	Timestamp            time.Time
-}
+type NodeConn struct {
+	ID uuid.UUID
 
-type Node struct {
-	ID            uuid.UUID `json:"id"`
-	Name          string    `json:"name"`
-	Codecs        []string  `json:"codecs"`
-	ResourceUsage ResourceUsage
-
-	logger     *log.Logger
 	stream     pb.VideoTranscoding_StreamServer
 	closedChan chan struct{}
-	mu         sync.Mutex
 }
 
-func (n *Node) SendRegisterResponse() error {
+func newNodeConn(id uuid.UUID, stream pb.VideoTranscoding_StreamServer) *NodeConn {
+	return &NodeConn{
+		ID:         id,
+		stream:     stream,
+		closedChan: make(chan struct{}),
+	}
+}
+
+func (n *NodeConn) SendRegisterResponse() error {
 	msg := &pb.OrchestratorMessage{
 		Base: &pb.MessageBase{
-			MessageId: "register-response-" + n.Name,
+			MessageId: "register-response-" + n.ID.String(),
 			Timestamp: timestamppb.Now(),
 		},
 		Payload: &pb.OrchestratorMessage_RegisterResponse{
@@ -41,12 +35,11 @@ func (n *Node) SendRegisterResponse() error {
 			},
 		},
 	}
-
 	return n.stream.Send(msg)
 }
 
-func (n *Node) SendJobAssignmentRequest(req *pb.JobAssignmentRequest) error {
-	msg := pb.OrchestratorMessage{
+func (n *NodeConn) SendJobAssignmentRequest(req *pb.JobAssignmentRequest) error {
+	msg := &pb.OrchestratorMessage{
 		Base: &pb.MessageBase{
 			MessageId: "job-assignment-" + req.JobId,
 			Timestamp: timestamppb.Now(),
@@ -55,16 +48,5 @@ func (n *Node) SendJobAssignmentRequest(req *pb.JobAssignmentRequest) error {
 			JobAssignmentRequest: req,
 		},
 	}
-
-	return n.stream.Send(&msg)
-}
-
-func (n *Node) SetResourceUsage(req *pb.ResourceUsageRequest, timestamp time.Time) {
-	n.mu.Lock()
-	defer n.mu.Unlock()
-
-	n.ResourceUsage = ResourceUsage{
-		ResourceUsageRequest: req,
-		Timestamp:            timestamp,
-	}
+	return n.stream.Send(msg)
 }

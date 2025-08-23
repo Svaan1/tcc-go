@@ -15,8 +15,8 @@ services:
       retries: 3
       start_period: 5s
     environment:
-      - TCP_PORT=8080
-      - HTTP_PORT=8081
+      - SERVER_PORT_GRPC=8080
+      - SERVER_PORT_HTTP=8081
     ports:
       - 8081:8081
 
@@ -31,7 +31,8 @@ services:
       - server
     restart: unless-stopped
     environment:
-      - SERVER_ADDRESS=server:8080
+      - SERVER_HOSTNAME=server
+      - SERVER_PORT_GRPC=8080
 
 networks:
   tcc-network:

@@ -24,7 +24,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     ./cmd/client/main.go
 
 # Final stage: minimal runtime image
-FROM scratch
+FROM alpine:latest
+
 
 # Copy timezone data and certificates from builder
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo

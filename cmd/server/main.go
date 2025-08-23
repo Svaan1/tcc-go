@@ -24,7 +24,7 @@ func main() {
 
 	log.Printf("Starting HTTP server at %s", httpAddress)
 
-	handlers := api.NewHandlers(sv)
+	handlers := api.NewHandlers(sv.App, sv)
 	http.HandleFunc("/nodes", handlers.GetNodes)
 	http.HandleFunc("/job", handlers.AssignJob)
 

@@ -37,5 +37,8 @@ func (c *Client) handleJobAssignment(ctx context.Context, jobRequest *pb.JobAssi
 		log.Printf("Failed to send job response: %v", err)
 	}
 
-	ffmpeg.Encode(jobRequest)
+	if err := ffmpeg.Encode(jobRequest); err != nil {
+		log.Printf("Failed to execute ffmpeg: %v", err)
+	}
+
 }

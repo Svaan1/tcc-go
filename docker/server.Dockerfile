@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     ./cmd/server/main.go
 
 # Final stage: minimal runtime image
-FROM scratch
+FROM alpine:latest
 
 # Copy timezone data and certificates from builder
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
@@ -32,9 +32,6 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # Copy the binary
 COPY --from=builder /build/server /server
-
-# Expose the API port
-EXPOSE 8082
 
 # Use the binary as entrypoint
 ENTRYPOINT ["/server"]

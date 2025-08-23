@@ -1,9 +1,9 @@
 # Local development
 server:
-	go run cmd/server/main.go
+	go run -race cmd/server/main.go
 
 client:
-	go run cmd/client/main.go
+	go run -race cmd/client/main.go
 
 # Docker builds
 docker-server:

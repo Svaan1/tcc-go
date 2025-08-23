@@ -3,7 +3,6 @@ package ffmpeg
 import (
 	"fmt"
 	"os/exec"
-	"strings"
 
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 )
@@ -23,8 +22,6 @@ func Encode(req *pb.JobAssignmentRequest) error {
 
 	cmd := exec.Command("ffmpeg", args...)
 
-	fmt.Printf("Executing: ffmpeg %s\n", strings.Join(args, " "))
-
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start ffmpeg: %v", err)
 	}
@@ -35,6 +32,5 @@ func Encode(req *pb.JobAssignmentRequest) error {
 		return fmt.Errorf("ffmpeg execution failed: %v", err)
 	}
 
-	fmt.Printf("Encoding job %s completed successfully\n", req.JobId)
 	return nil
 }

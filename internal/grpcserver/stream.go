@@ -4,28 +4,27 @@ import (
 	"io"
 	"log"
 
+	"github.com/svaan1/go-tcc/internal/app"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 )
 
 func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	log.Printf("New connection established")
 
-	node, err := sv.RegisterNode(stream)
+	node, nodeConn, err := sv.RegisterNode(stream)
 	if err != nil {
 		return err
 	}
 
 	defer func() {
-		sv.mu.Lock()
-		delete(sv.Nodes, node.ID)
-		sv.mu.Unlock()
+		sv.App.RemoveNode(node.ID)
 		log.Printf("Node %s (%s) disconnected", node.Name, node.ID.String())
 	}()
 
 	log.Printf("Starting message processing loop for node %s", node.Name)
 	for {
 		select {
-		case <-node.closedChan:
+		case <-nodeConn.closedChan:
 			log.Printf("Node %s stream closing due to closed channel", node.Name)
 			return nil
 		default:
@@ -44,7 +43,14 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 
 			switch payload := msg.Payload.(type) {
 			case *pb.NodeMessage_ResourceUsageRequest:
-				node.SetResourceUsage(payload.ResourceUsageRequest, msg.Base.Timestamp.AsTime())
+				ts := msg.Base.Timestamp.AsTime()
+
+				_ = sv.App.UpdateResourceUsage(stream.Context(), node.ID,
+					app.ResourceUsage{
+						CPUPercent:    payload.ResourceUsageRequest.CpuPercent,
+						MemoryPercent: payload.ResourceUsageRequest.MemoryPercent,
+						DiskPercent:   payload.ResourceUsageRequest.DiskPercent,
+					}, ts)
 			case *pb.NodeMessage_JobAssignmentResponse:
 				log.Printf("Job assignment response: job_id=%s, accepted=%t, message=%s",
 					payload.JobAssignmentResponse.JobId,

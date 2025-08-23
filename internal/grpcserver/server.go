@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/svaan1/go-tcc/internal/app"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 	"google.golang.org/grpc"
 )
@@ -22,8 +23,9 @@ type ServerConfig struct {
 type Server struct {
 	pb.VideoTranscodingServer
 
-	Config ServerConfig
-	Nodes  map[uuid.UUID]*Node
+	Config    ServerConfig
+	App       *app.Service
+	NodeConns map[uuid.UUID]*NodeConn
 
 	listener *net.Listener
 	mu       sync.RWMutex
@@ -37,8 +39,9 @@ func New(address string) *Server {
 
 			ResourceUsagePollingTimeout: 10 * time.Second,
 		},
-		Nodes:    map[uuid.UUID]*Node{},
-		listener: nil,
+		App:       app.NewService(),
+		NodeConns: map[uuid.UUID]*NodeConn{},
+		listener:  nil,
 	}
 
 }
@@ -71,13 +74,19 @@ func (sv *Server) trackTimedOutNodes() {
 	defer ticker.Stop()
 
 	for range ticker.C {
+		now := time.Now()
+		ids := sv.App.TimedOutIDs(now, sv.Config.ResourceUsagePollingTimeout)
+		if len(ids) == 0 {
+			continue
+		}
+
 		sv.mu.Lock()
-		for _, node := range sv.Nodes {
-			if time.Since(node.ResourceUsage.Timestamp) > sv.Config.ResourceUsagePollingTimeout {
+		for _, id := range ids {
+			if conn, ok := sv.NodeConns[id]; ok {
 				select {
-				case <-node.closedChan:
+				case <-conn.closedChan:
 				default:
-					close(node.closedChan)
+					close(conn.closedChan)
 				}
 			}
 		}
