@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/svaan1/go-tcc/internal/server"
+	"github.com/svaan1/go-tcc/internal/grpcserver"
 )
 
 type Handlers struct {
-	sv *server.Server
+	sv *grpcserver.Server
 }
 
-func NewHandlers(sv *server.Server) *Handlers {
+func NewHandlers(sv *grpcserver.Server) *Handlers {
 	return &Handlers{sv}
 }
 

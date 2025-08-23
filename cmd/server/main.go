@@ -6,20 +6,15 @@ import (
 	"net/http"
 
 	"github.com/svaan1/go-tcc/internal/api"
-	"github.com/svaan1/go-tcc/internal/server"
-	"github.com/svaan1/go-tcc/pkg/utils"
-)
-
-var (
-	tcpPort  = utils.GetEnv("TCP_PORT", "8080")
-	httpPort = utils.GetEnv("HTTP_PORT", "8081")
+	"github.com/svaan1/go-tcc/internal/config"
+	"github.com/svaan1/go-tcc/internal/grpcserver"
 )
 
 func main() {
-	tcpAddress := net.JoinHostPort("", tcpPort)
-	httpAddress := net.JoinHostPort("", httpPort)
+	grpcAddress := net.JoinHostPort("", config.ServerPortGRPC)
+	httpAddress := net.JoinHostPort("", config.ServerPortHTTP)
 
-	sv := server.New(tcpAddress)
+	sv := grpcserver.New(grpcAddress)
 
 	go func() {
 		if err := sv.Serve(); err != nil {
