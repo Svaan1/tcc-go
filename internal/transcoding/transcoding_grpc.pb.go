@@ -19,7 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	VideoTranscoding_Stream_FullMethodName = "/transcoding.VideoTranscoding/Stream"
+	VideoTranscoding_Stream_FullMethodName      = "/transcoding.VideoTranscoding/Stream"
+	VideoTranscoding_GetAllNodes_FullMethodName = "/transcoding.VideoTranscoding/GetAllNodes"
+	VideoTranscoding_EnqueueJob_FullMethodName  = "/transcoding.VideoTranscoding/EnqueueJob"
 )
 
 // VideoTranscodingClient is the client API for VideoTranscoding service.
@@ -28,6 +30,10 @@ const (
 type VideoTranscodingClient interface {
 	// Stream establishes a bidirectional communication channel between orchestrator and nodes
 	Stream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[NodeMessage, OrchestratorMessage], error)
+	// GetAllNodes returns all registered nodes with their current resource usage
+	GetAllNodes(ctx context.Context, in *GetAllNodesRequest, opts ...grpc.CallOption) (*GetAllNodesResponse, error)
+	// EnqueueJob enqueues a new transcoding job to be assigned to an available node
+	EnqueueJob(ctx context.Context, in *EnqueueJobRequest, opts ...grpc.CallOption) (*EnqueueJobResponse, error)
 }
 
 type videoTranscodingClient struct {
@@ -51,12 +57,36 @@ func (c *videoTranscodingClient) Stream(ctx context.Context, opts ...grpc.CallOp
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type VideoTranscoding_StreamClient = grpc.BidiStreamingClient[NodeMessage, OrchestratorMessage]
 
+func (c *videoTranscodingClient) GetAllNodes(ctx context.Context, in *GetAllNodesRequest, opts ...grpc.CallOption) (*GetAllNodesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllNodesResponse)
+	err := c.cc.Invoke(ctx, VideoTranscoding_GetAllNodes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *videoTranscodingClient) EnqueueJob(ctx context.Context, in *EnqueueJobRequest, opts ...grpc.CallOption) (*EnqueueJobResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EnqueueJobResponse)
+	err := c.cc.Invoke(ctx, VideoTranscoding_EnqueueJob_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoTranscodingServer is the server API for VideoTranscoding service.
 // All implementations must embed UnimplementedVideoTranscodingServer
 // for forward compatibility.
 type VideoTranscodingServer interface {
 	// Stream establishes a bidirectional communication channel between orchestrator and nodes
 	Stream(grpc.BidiStreamingServer[NodeMessage, OrchestratorMessage]) error
+	// GetAllNodes returns all registered nodes with their current resource usage
+	GetAllNodes(context.Context, *GetAllNodesRequest) (*GetAllNodesResponse, error)
+	// EnqueueJob enqueues a new transcoding job to be assigned to an available node
+	EnqueueJob(context.Context, *EnqueueJobRequest) (*EnqueueJobResponse, error)
 	mustEmbedUnimplementedVideoTranscodingServer()
 }
 
@@ -69,6 +99,12 @@ type UnimplementedVideoTranscodingServer struct{}
 
 func (UnimplementedVideoTranscodingServer) Stream(grpc.BidiStreamingServer[NodeMessage, OrchestratorMessage]) error {
 	return status.Errorf(codes.Unimplemented, "method Stream not implemented")
+}
+func (UnimplementedVideoTranscodingServer) GetAllNodes(context.Context, *GetAllNodesRequest) (*GetAllNodesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllNodes not implemented")
+}
+func (UnimplementedVideoTranscodingServer) EnqueueJob(context.Context, *EnqueueJobRequest) (*EnqueueJobResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnqueueJob not implemented")
 }
 func (UnimplementedVideoTranscodingServer) mustEmbedUnimplementedVideoTranscodingServer() {}
 func (UnimplementedVideoTranscodingServer) testEmbeddedByValue()                          {}
@@ -98,13 +134,58 @@ func _VideoTranscoding_Stream_Handler(srv interface{}, stream grpc.ServerStream)
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type VideoTranscoding_StreamServer = grpc.BidiStreamingServer[NodeMessage, OrchestratorMessage]
 
+func _VideoTranscoding_GetAllNodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllNodesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoTranscodingServer).GetAllNodes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoTranscoding_GetAllNodes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoTranscodingServer).GetAllNodes(ctx, req.(*GetAllNodesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VideoTranscoding_EnqueueJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EnqueueJobRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoTranscodingServer).EnqueueJob(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoTranscoding_EnqueueJob_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoTranscodingServer).EnqueueJob(ctx, req.(*EnqueueJobRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoTranscoding_ServiceDesc is the grpc.ServiceDesc for VideoTranscoding service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var VideoTranscoding_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "transcoding.VideoTranscoding",
 	HandlerType: (*VideoTranscodingServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetAllNodes",
+			Handler:    _VideoTranscoding_GetAllNodes_Handler,
+		},
+		{
+			MethodName: "EnqueueJob",
+			Handler:    _VideoTranscoding_EnqueueJob_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Stream",

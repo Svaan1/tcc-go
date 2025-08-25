@@ -800,6 +800,338 @@ func (x *DisconnectResponse) GetAcknowledged() bool {
 	return false
 }
 
+type GetAllNodesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllNodesRequest) Reset() {
+	*x = GetAllNodesRequest{}
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllNodesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllNodesRequest) ProtoMessage() {}
+
+func (x *GetAllNodesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllNodesRequest.ProtoReflect.Descriptor instead.
+func (*GetAllNodesRequest) Descriptor() ([]byte, []int) {
+	return file_internal_transcoding_transcoding_proto_rawDescGZIP(), []int{11}
+}
+
+type NodeInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Codecs        []string               `protobuf:"bytes,3,rep,name=codecs,proto3" json:"codecs,omitempty"`
+	CpuPercent    float64                `protobuf:"fixed64,4,opt,name=cpu_percent,json=cpuPercent,proto3" json:"cpu_percent,omitempty"`
+	MemoryPercent float64                `protobuf:"fixed64,5,opt,name=memory_percent,json=memoryPercent,proto3" json:"memory_percent,omitempty"`
+	DiskPercent   float64                `protobuf:"fixed64,6,opt,name=disk_percent,json=diskPercent,proto3" json:"disk_percent,omitempty"`
+	LastSeen      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=last_seen,json=lastSeen,proto3" json:"last_seen,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NodeInfo) Reset() {
+	*x = NodeInfo{}
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NodeInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NodeInfo) ProtoMessage() {}
+
+func (x *NodeInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NodeInfo.ProtoReflect.Descriptor instead.
+func (*NodeInfo) Descriptor() ([]byte, []int) {
+	return file_internal_transcoding_transcoding_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *NodeInfo) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *NodeInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *NodeInfo) GetCodecs() []string {
+	if x != nil {
+		return x.Codecs
+	}
+	return nil
+}
+
+func (x *NodeInfo) GetCpuPercent() float64 {
+	if x != nil {
+		return x.CpuPercent
+	}
+	return 0
+}
+
+func (x *NodeInfo) GetMemoryPercent() float64 {
+	if x != nil {
+		return x.MemoryPercent
+	}
+	return 0
+}
+
+func (x *NodeInfo) GetDiskPercent() float64 {
+	if x != nil {
+		return x.DiskPercent
+	}
+	return 0
+}
+
+func (x *NodeInfo) GetLastSeen() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastSeen
+	}
+	return nil
+}
+
+type GetAllNodesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Nodes         []*NodeInfo            `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
+	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllNodesResponse) Reset() {
+	*x = GetAllNodesResponse{}
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllNodesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllNodesResponse) ProtoMessage() {}
+
+func (x *GetAllNodesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllNodesResponse.ProtoReflect.Descriptor instead.
+func (*GetAllNodesResponse) Descriptor() ([]byte, []int) {
+	return file_internal_transcoding_transcoding_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetAllNodesResponse) GetNodes() []*NodeInfo {
+	if x != nil {
+		return x.Nodes
+	}
+	return nil
+}
+
+func (x *GetAllNodesResponse) GetTotalCount() int32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+type EnqueueJobRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	InputPath     string                 `protobuf:"bytes,1,opt,name=input_path,json=inputPath,proto3" json:"input_path,omitempty"`
+	OutputPath    string                 `protobuf:"bytes,2,opt,name=output_path,json=outputPath,proto3" json:"output_path,omitempty"`
+	Crf           string                 `protobuf:"bytes,3,opt,name=crf,proto3" json:"crf,omitempty"`
+	Preset        string                 `protobuf:"bytes,4,opt,name=preset,proto3" json:"preset,omitempty"`
+	AudioCodec    string                 `protobuf:"bytes,5,opt,name=audio_codec,json=audioCodec,proto3" json:"audio_codec,omitempty"`
+	VideoCodec    string                 `protobuf:"bytes,6,opt,name=video_codec,json=videoCodec,proto3" json:"video_codec,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnqueueJobRequest) Reset() {
+	*x = EnqueueJobRequest{}
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnqueueJobRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnqueueJobRequest) ProtoMessage() {}
+
+func (x *EnqueueJobRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnqueueJobRequest.ProtoReflect.Descriptor instead.
+func (*EnqueueJobRequest) Descriptor() ([]byte, []int) {
+	return file_internal_transcoding_transcoding_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *EnqueueJobRequest) GetInputPath() string {
+	if x != nil {
+		return x.InputPath
+	}
+	return ""
+}
+
+func (x *EnqueueJobRequest) GetOutputPath() string {
+	if x != nil {
+		return x.OutputPath
+	}
+	return ""
+}
+
+func (x *EnqueueJobRequest) GetCrf() string {
+	if x != nil {
+		return x.Crf
+	}
+	return ""
+}
+
+func (x *EnqueueJobRequest) GetPreset() string {
+	if x != nil {
+		return x.Preset
+	}
+	return ""
+}
+
+func (x *EnqueueJobRequest) GetAudioCodec() string {
+	if x != nil {
+		return x.AudioCodec
+	}
+	return ""
+}
+
+func (x *EnqueueJobRequest) GetVideoCodec() string {
+	if x != nil {
+		return x.VideoCodec
+	}
+	return ""
+}
+
+type EnqueueJobResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	JobId          string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Success        bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message        string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	AssignedNodeId string                 `protobuf:"bytes,4,opt,name=assigned_node_id,json=assignedNodeId,proto3" json:"assigned_node_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EnqueueJobResponse) Reset() {
+	*x = EnqueueJobResponse{}
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnqueueJobResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnqueueJobResponse) ProtoMessage() {}
+
+func (x *EnqueueJobResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_transcoding_transcoding_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnqueueJobResponse.ProtoReflect.Descriptor instead.
+func (*EnqueueJobResponse) Descriptor() ([]byte, []int) {
+	return file_internal_transcoding_transcoding_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *EnqueueJobResponse) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *EnqueueJobResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *EnqueueJobResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *EnqueueJobResponse) GetAssignedNodeId() string {
+	if x != nil {
+		return x.AssignedNodeId
+	}
+	return ""
+}
+
 var File_internal_transcoding_transcoding_proto protoreflect.FileDescriptor
 
 const file_internal_transcoding_transcoding_proto_rawDesc = "" +
@@ -859,9 +1191,42 @@ const file_internal_transcoding_transcoding_proto_rawDesc = "" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x16\n" +
 	"\x06reason\x18\x02 \x01(\tR\x06reason\"8\n" +
 	"\x12DisconnectResponse\x12\"\n" +
-	"\facknowledged\x18\x01 \x01(\bR\facknowledged2\\\n" +
+	"\facknowledged\x18\x01 \x01(\bR\facknowledged\"\x14\n" +
+	"\x12GetAllNodesRequest\"\xf3\x01\n" +
+	"\bNodeInfo\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
+	"\x06codecs\x18\x03 \x03(\tR\x06codecs\x12\x1f\n" +
+	"\vcpu_percent\x18\x04 \x01(\x01R\n" +
+	"cpuPercent\x12%\n" +
+	"\x0ememory_percent\x18\x05 \x01(\x01R\rmemoryPercent\x12!\n" +
+	"\fdisk_percent\x18\x06 \x01(\x01R\vdiskPercent\x127\n" +
+	"\tlast_seen\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\blastSeen\"c\n" +
+	"\x13GetAllNodesResponse\x12+\n" +
+	"\x05nodes\x18\x01 \x03(\v2\x15.transcoding.NodeInfoR\x05nodes\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\x05R\n" +
+	"totalCount\"\xbf\x01\n" +
+	"\x11EnqueueJobRequest\x12\x1d\n" +
+	"\n" +
+	"input_path\x18\x01 \x01(\tR\tinputPath\x12\x1f\n" +
+	"\voutput_path\x18\x02 \x01(\tR\n" +
+	"outputPath\x12\x10\n" +
+	"\x03crf\x18\x03 \x01(\tR\x03crf\x12\x16\n" +
+	"\x06preset\x18\x04 \x01(\tR\x06preset\x12\x1f\n" +
+	"\vaudio_codec\x18\x05 \x01(\tR\n" +
+	"audioCodec\x12\x1f\n" +
+	"\vvideo_codec\x18\x06 \x01(\tR\n" +
+	"videoCodec\"\x89\x01\n" +
+	"\x12EnqueueJobResponse\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\x12(\n" +
+	"\x10assigned_node_id\x18\x04 \x01(\tR\x0eassignedNodeId2\xfd\x01\n" +
 	"\x10VideoTranscoding\x12H\n" +
-	"\x06Stream\x12\x18.transcoding.NodeMessage\x1a .transcoding.OrchestratorMessage(\x010\x01B/Z-github.com/svaan1/go-tcc/internal/transcodingb\x06proto3"
+	"\x06Stream\x12\x18.transcoding.NodeMessage\x1a .transcoding.OrchestratorMessage(\x010\x01\x12P\n" +
+	"\vGetAllNodes\x12\x1f.transcoding.GetAllNodesRequest\x1a .transcoding.GetAllNodesResponse\x12M\n" +
+	"\n" +
+	"EnqueueJob\x12\x1e.transcoding.EnqueueJobRequest\x1a\x1f.transcoding.EnqueueJobResponseB/Z-github.com/svaan1/go-tcc/internal/transcodingb\x06proto3"
 
 var (
 	file_internal_transcoding_transcoding_proto_rawDescOnce sync.Once
@@ -875,7 +1240,7 @@ func file_internal_transcoding_transcoding_proto_rawDescGZIP() []byte {
 	return file_internal_transcoding_transcoding_proto_rawDescData
 }
 
-var file_internal_transcoding_transcoding_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_internal_transcoding_transcoding_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_internal_transcoding_transcoding_proto_goTypes = []any{
 	(*MessageBase)(nil),           // 0: transcoding.MessageBase
 	(*NodeMessage)(nil),           // 1: transcoding.NodeMessage
@@ -888,10 +1253,15 @@ var file_internal_transcoding_transcoding_proto_goTypes = []any{
 	(*JobAssignmentResponse)(nil), // 8: transcoding.JobAssignmentResponse
 	(*DisconnectRequest)(nil),     // 9: transcoding.DisconnectRequest
 	(*DisconnectResponse)(nil),    // 10: transcoding.DisconnectResponse
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*GetAllNodesRequest)(nil),    // 11: transcoding.GetAllNodesRequest
+	(*NodeInfo)(nil),              // 12: transcoding.NodeInfo
+	(*GetAllNodesResponse)(nil),   // 13: transcoding.GetAllNodesResponse
+	(*EnqueueJobRequest)(nil),     // 14: transcoding.EnqueueJobRequest
+	(*EnqueueJobResponse)(nil),    // 15: transcoding.EnqueueJobResponse
+	(*timestamppb.Timestamp)(nil), // 16: google.protobuf.Timestamp
 }
 var file_internal_transcoding_transcoding_proto_depIdxs = []int32{
-	11, // 0: transcoding.MessageBase.timestamp:type_name -> google.protobuf.Timestamp
+	16, // 0: transcoding.MessageBase.timestamp:type_name -> google.protobuf.Timestamp
 	0,  // 1: transcoding.NodeMessage.base:type_name -> transcoding.MessageBase
 	3,  // 2: transcoding.NodeMessage.register_request:type_name -> transcoding.RegisterRequest
 	5,  // 3: transcoding.NodeMessage.resource_usage_request:type_name -> transcoding.ResourceUsageRequest
@@ -902,13 +1272,19 @@ var file_internal_transcoding_transcoding_proto_depIdxs = []int32{
 	6,  // 8: transcoding.OrchestratorMessage.resource_usage_response:type_name -> transcoding.ResourceUsageResponse
 	7,  // 9: transcoding.OrchestratorMessage.job_assignment_request:type_name -> transcoding.JobAssignmentRequest
 	10, // 10: transcoding.OrchestratorMessage.disconnect_response:type_name -> transcoding.DisconnectResponse
-	1,  // 11: transcoding.VideoTranscoding.Stream:input_type -> transcoding.NodeMessage
-	2,  // 12: transcoding.VideoTranscoding.Stream:output_type -> transcoding.OrchestratorMessage
-	12, // [12:13] is the sub-list for method output_type
-	11, // [11:12] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	16, // 11: transcoding.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
+	12, // 12: transcoding.GetAllNodesResponse.nodes:type_name -> transcoding.NodeInfo
+	1,  // 13: transcoding.VideoTranscoding.Stream:input_type -> transcoding.NodeMessage
+	11, // 14: transcoding.VideoTranscoding.GetAllNodes:input_type -> transcoding.GetAllNodesRequest
+	14, // 15: transcoding.VideoTranscoding.EnqueueJob:input_type -> transcoding.EnqueueJobRequest
+	2,  // 16: transcoding.VideoTranscoding.Stream:output_type -> transcoding.OrchestratorMessage
+	13, // 17: transcoding.VideoTranscoding.GetAllNodes:output_type -> transcoding.GetAllNodesResponse
+	15, // 18: transcoding.VideoTranscoding.EnqueueJob:output_type -> transcoding.EnqueueJobResponse
+	16, // [16:19] is the sub-list for method output_type
+	13, // [13:16] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_internal_transcoding_transcoding_proto_init() }
@@ -934,7 +1310,7 @@ func file_internal_transcoding_transcoding_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_transcoding_transcoding_proto_rawDesc), len(file_internal_transcoding_transcoding_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

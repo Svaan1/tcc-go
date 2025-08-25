@@ -9,6 +9,9 @@ import "google/protobuf/timestamp.proto";
 service VideoTranscoding {
   // Stream establishes a bidirectional communication channel between orchestrator and nodes
   rpc Stream(stream NodeMessage) returns (stream OrchestratorMessage);
+  
+  rpc GetAllNodes(GetAllNodesRequest) returns (GetAllNodesResponse);
+  rpc EnqueueJob(EnqueueJobRequest) returns (EnqueueJobResponse);
 }
 
 message MessageBase {
@@ -86,4 +89,37 @@ message DisconnectRequest {
 
 message DisconnectResponse {
   bool acknowledged = 1;
+}
+
+message GetAllNodesRequest {}
+
+message NodeInfo {
+  string node_id = 1;
+  string name = 2;
+  repeated string codecs = 3;
+  double cpu_percent = 4;
+  double memory_percent = 5;
+  double disk_percent = 6;
+  google.protobuf.Timestamp last_seen = 7;
+}
+
+message GetAllNodesResponse {
+  repeated NodeInfo nodes = 1;
+  int32 total_count = 2;
+}
+
+message EnqueueJobRequest {
+  string input_path = 1;
+  string output_path = 2;
+  string crf = 3;
+  string preset = 4;
+  string audio_codec = 5;
+  string video_codec = 6;
+}
+
+message EnqueueJobResponse {
+  string job_id = 1;
+  bool success = 2;
+  string message = 3;
+  string assigned_node_id = 4;
 }
