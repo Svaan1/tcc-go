@@ -5,14 +5,14 @@ import (
 	"net"
 
 	"github.com/svaan1/go-tcc/internal/config"
-	"github.com/svaan1/go-tcc/internal/grpcserver"
+	"github.com/svaan1/go-tcc/internal/grpc/server"
 )
 
 func main() {
 	grpcAddress := net.JoinHostPort("", config.ServerPortGRPC)
 	httpAddress := net.JoinHostPort("", config.ServerPortHTTP)
 
-	sv := grpcserver.New(grpcAddress)
+	sv := server.New(grpcAddress)
 
 	log.Printf("Starting HTTP server at %s", httpAddress)
 

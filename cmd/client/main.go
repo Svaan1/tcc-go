@@ -10,7 +10,7 @@ import (
 	"syscall"
 
 	"github.com/svaan1/go-tcc/internal/config"
-	"github.com/svaan1/go-tcc/internal/grpcclient"
+	"github.com/svaan1/go-tcc/internal/grpc/client"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 	address := net.JoinHostPort(config.ServerHostName, config.ServerPortGRPC)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	client := grpcclient.New(address)
+	client := client.New(address)
 
 	err := client.Connect(ctx, config.ClientName, codecs)
 	if err != nil {

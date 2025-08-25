@@ -1,4 +1,4 @@
-package grpcserver
+package server
 
 import (
 	"context"
@@ -59,15 +59,15 @@ func (sv *Server) Serve() error {
 
 	log.Printf("Server listening on %s %s", sv.Config.Network, sv.Config.Address)
 
-	grpcServer := grpc.NewServer()
-	pb.RegisterVideoTranscodingServer(grpcServer, sv)
+	server := grpc.NewServer()
+	pb.RegisterVideoTranscodingServer(server, sv)
 
-	reflection.Register(grpcServer)
+	reflection.Register(server)
 
 	go sv.trackTimedOutNodes()
 
 	log.Println("Starting gRPC server...")
-	if err := grpcServer.Serve(listener); err != nil {
+	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("failed to serve gRPC server: %w", err)
 	}
 
