@@ -1,107 +1,137 @@
 package app
 
 import (
-	"context"
 	"errors"
-	"sort"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/svaan1/go-tcc/internal/ffmpeg"
 )
 
-// Service owns domain state and policies for the orchestrator.
+// Service is the job scheduling service that coordinates between job queue and node management.
 type Service struct {
-	nodes map[uuid.UUID]*Node
-
-	mu sync.RWMutex
+	nodeManager *NodeManager
+	jobQueue    *JobQueue
 }
 
 func NewService() *Service {
 	return &Service{
-		nodes: make(map[uuid.UUID]*Node),
+		nodeManager: NewNodeManager(),
+		jobQueue:    NewJobQueue(),
 	}
 }
 
-func (s *Service) ListNodes(ctx context.Context) []*Node {
-	_ = ctx
-	s.mu.RLock()
-	out := make([]*Node, 0, len(s.nodes))
-	for _, n := range s.nodes {
-		out = append(out, n)
-	}
-	s.mu.RUnlock()
-
-	// stable order (by Name) for deterministic APIs
-	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
-	return out
-}
-
-func (s *Service) RegisterNode(ctx context.Context, name string, codecs []string, now time.Time) (*Node, error) {
-	_ = ctx // reserved for auth/cancel in future
-	n := &Node{
-		ID:     uuid.New(),
-		Name:   name,
-		Codecs: codecs,
-	}
-	s.mu.Lock()
-	n.ResourceUsage.Timestamp = now
-	s.nodes[n.ID] = n
-	s.mu.Unlock()
-	return n, nil
+// Node management methods (delegated to NodeManager)
+func (s *Service) RegisterNode(name string, codecs []string, now time.Time) (*Node, error) {
+	return s.nodeManager.RegisterNode(name, codecs, now)
 }
 
 func (s *Service) RemoveNode(id uuid.UUID) {
-	s.mu.Lock()
-	delete(s.nodes, id)
-	s.mu.Unlock()
+	s.nodeManager.RemoveNode(id)
 }
 
-func (s *Service) UpdateResourceUsage(ctx context.Context, id uuid.UUID, usage ResourceUsage, ts time.Time) error {
-	_ = ctx
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	node, ok := s.nodes[id]
-	if !ok {
-		return errors.New("node not found")
+func (s *Service) ListNodes() []*Node {
+	return s.nodeManager.ListNodes()
+}
+
+func (s *Service) UpdateResourceUsage(id uuid.UUID, usage ResourceUsage, ts time.Time) error {
+	return s.nodeManager.UpdateResourceUsage(id, usage, ts)
+}
+
+func (s *Service) GetTimedOutNodes(now time.Time, timeout time.Duration) []uuid.UUID {
+	return s.nodeManager.GetTimedOutNodes(now, timeout)
+}
+
+// Job management methods (delegated to JobQueue)
+func (s *Service) EnqueueJob(params *ffmpeg.EncodingParams) (*Job, error) {
+	return s.jobQueue.Enqueue(params)
+}
+
+func (s *Service) GetJob(jobID uuid.UUID) (*Job, bool) {
+	return s.jobQueue.GetJob(jobID)
+}
+
+func (s *Service) ListJobs() []*Job {
+	return s.jobQueue.ListJobs()
+}
+
+// Scheduling logic - this is where the intelligence happens
+func (s *Service) AssignJobToNode(jobID uuid.UUID) (*Node, error) {
+	job, exists := s.jobQueue.GetJob(jobID)
+	if !exists {
+		return nil, errors.New("job not found")
 	}
 
-	usage.Timestamp = ts
-	node.ResourceUsage = usage
-	return nil
+	if job.Status != JobStatusPending {
+		return nil, errors.New("job is not in pending status")
+	}
+
+	// Get the required codec from job params
+	requiredCodec := job.Params.VideoCodec
+	availableNodes := s.nodeManager.GetAvailableNodes(requiredCodec)
+
+	if len(availableNodes) == 0 {
+		return nil, errors.New("no available nodes support the required codec")
+	}
+
+	// Select best node (placeholder for more sophisticated logic)
+	bestNode := s.selectBestNode(availableNodes)
+
+	// Update job status and assign node
+	err := s.jobQueue.UpdateJobStatus(jobID, JobStatusAssigned)
+	if err != nil {
+		return nil, err
+	}
+
+	job.AssignedNode = &bestNode.ID
+
+	return bestNode, nil
 }
 
-// TimedOutIDs returns node IDs whose lastSeen exceed timeout.
-func (s *Service) TimedOutIDs(now time.Time, timeout time.Duration) []uuid.UUID {
-	s.mu.RLock()
-	ids := make([]uuid.UUID, 0)
-	for id, n := range s.nodes {
-		if now.Sub(n.ResourceUsage.Timestamp) > timeout {
-			ids = append(ids, id)
+// selectBestNode implements node selection algorithm
+func (s *Service) selectBestNode(nodes []*Node) *Node {
+	if len(nodes) == 0 {
+		return nil
+	}
+
+	// Simple algorithm: select node with lowest CPU usage
+	// TODO: Implement more sophisticated scoring based on multiple factors
+	bestNode := nodes[0]
+	lowestCPU := bestNode.ResourceUsage.CPUPercent
+
+	for _, node := range nodes[1:] {
+		if node.ResourceUsage.CPUPercent < lowestCPU {
+			lowestCPU = node.ResourceUsage.CPUPercent
+			bestNode = node
 		}
 	}
-	s.mu.RUnlock()
-	return ids
+
+	return bestNode
 }
 
-// PickNodeForJob returns a node id using a simple policy (lowest CPU usage).
-func (s *Service) PickNodeForJob(ctx context.Context) (uuid.UUID, error) {
-	_ = ctx
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+// ProcessPendingJobs attempts to assign pending jobs to available nodes
+func (s *Service) ProcessPendingJobs() (int, error) {
+	assigned := 0
 
-	var bestID uuid.UUID
-	bestCPU := 200.0 // larger than any real percent
-	for id, n := range s.nodes {
-		if n.ResourceUsage.CPUPercent < bestCPU {
-			bestCPU = n.ResourceUsage.CPUPercent
-			bestID = id
+	for {
+		pendingJob := s.jobQueue.GetNextPendingJob()
+		if pendingJob == nil {
+			break // No more pending jobs
 		}
+
+		_, err := s.AssignJobToNode(pendingJob.ID)
+		if err != nil {
+			// Log error but continue with other jobs
+			continue
+		}
+
+		assigned++
 	}
 
-	if bestID == (uuid.UUID{}) {
-		return uuid.Nil, errors.New("no node available")
-	}
+	return assigned, nil
+}
 
-	return bestID, nil
+// UpdateJobStatus updates a job's status
+func (s *Service) UpdateJobStatus(jobID uuid.UUID, status JobStatus) error {
+	return s.jobQueue.UpdateJobStatus(jobID, status)
 }

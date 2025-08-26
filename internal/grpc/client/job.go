@@ -10,6 +10,7 @@ import (
 )
 
 func (c *Client) handleJobAssignment(ctx context.Context, jobRequest *pb.JobAssignmentRequest) {
+	_ = ctx
 	log.Printf("Received job assignment: ID=%s, input=%s, output=%s",
 		jobRequest.JobId, jobRequest.InputPath, jobRequest.OutputPath)
 
@@ -32,13 +33,20 @@ func (c *Client) handleJobAssignment(ctx context.Context, jobRequest *pb.JobAssi
 		},
 	}
 
-	err := c.stream.Send(response)
-	if err != nil {
+	if err := c.stream.Send(response); err != nil {
 		log.Printf("Failed to send job response: %v", err)
 	}
 
-	if err := ffmpeg.Encode(jobRequest); err != nil {
+	err := ffmpeg.Encode(&ffmpeg.EncodingParams{
+		InputPath:  jobRequest.InputPath,
+		OutputPath: jobRequest.OutputPath,
+		VideoCodec: jobRequest.VideoCodec,
+		AudioCodec: jobRequest.AudioCodec,
+		Crf:        jobRequest.Crf,
+		Preset:     jobRequest.Preset,
+	})
+
+	if err != nil {
 		log.Printf("Failed to execute ffmpeg: %v", err)
 	}
-
 }

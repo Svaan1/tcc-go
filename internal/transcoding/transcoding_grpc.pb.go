@@ -30,9 +30,7 @@ const (
 type VideoTranscodingClient interface {
 	// Stream establishes a bidirectional communication channel between orchestrator and nodes
 	Stream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[NodeMessage, OrchestratorMessage], error)
-	// GetAllNodes returns all registered nodes with their current resource usage
 	GetAllNodes(ctx context.Context, in *GetAllNodesRequest, opts ...grpc.CallOption) (*GetAllNodesResponse, error)
-	// EnqueueJob enqueues a new transcoding job to be assigned to an available node
 	EnqueueJob(ctx context.Context, in *EnqueueJobRequest, opts ...grpc.CallOption) (*EnqueueJobResponse, error)
 }
 
@@ -83,9 +81,7 @@ func (c *videoTranscodingClient) EnqueueJob(ctx context.Context, in *EnqueueJobR
 type VideoTranscodingServer interface {
 	// Stream establishes a bidirectional communication channel between orchestrator and nodes
 	Stream(grpc.BidiStreamingServer[NodeMessage, OrchestratorMessage]) error
-	// GetAllNodes returns all registered nodes with their current resource usage
 	GetAllNodes(context.Context, *GetAllNodesRequest) (*GetAllNodesResponse, error)
-	// EnqueueJob enqueues a new transcoding job to be assigned to an available node
 	EnqueueJob(context.Context, *EnqueueJobRequest) (*EnqueueJobResponse, error)
 	mustEmbedUnimplementedVideoTranscodingServer()
 }

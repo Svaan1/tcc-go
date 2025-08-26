@@ -1065,13 +1065,12 @@ func (x *EnqueueJobRequest) GetVideoCodec() string {
 }
 
 type EnqueueJobResponse struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	JobId          string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
-	Success        bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
-	Message        string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
-	AssignedNodeId string                 `protobuf:"bytes,4,opt,name=assigned_node_id,json=assignedNodeId,proto3" json:"assigned_node_id,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *EnqueueJobResponse) Reset() {
@@ -1121,13 +1120,6 @@ func (x *EnqueueJobResponse) GetSuccess() bool {
 func (x *EnqueueJobResponse) GetMessage() string {
 	if x != nil {
 		return x.Message
-	}
-	return ""
-}
-
-func (x *EnqueueJobResponse) GetAssignedNodeId() string {
-	if x != nil {
-		return x.AssignedNodeId
 	}
 	return ""
 }
@@ -1216,12 +1208,11 @@ const file_internal_transcoding_transcoding_proto_rawDesc = "" +
 	"\vaudio_codec\x18\x05 \x01(\tR\n" +
 	"audioCodec\x12\x1f\n" +
 	"\vvideo_codec\x18\x06 \x01(\tR\n" +
-	"videoCodec\"\x89\x01\n" +
+	"videoCodec\"_\n" +
 	"\x12EnqueueJobResponse\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\x12(\n" +
-	"\x10assigned_node_id\x18\x04 \x01(\tR\x0eassignedNodeId2\xfd\x01\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage2\xfd\x01\n" +
 	"\x10VideoTranscoding\x12H\n" +
 	"\x06Stream\x12\x18.transcoding.NodeMessage\x1a .transcoding.OrchestratorMessage(\x010\x01\x12P\n" +
 	"\vGetAllNodes\x12\x1f.transcoding.GetAllNodesRequest\x1a .transcoding.GetAllNodesResponse\x12M\n" +

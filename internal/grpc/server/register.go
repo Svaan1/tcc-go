@@ -22,7 +22,7 @@ func (sv *Server) RegisterNode(stream pb.VideoTranscoding_StreamServer) (*app.No
 		return nil, nil, fmt.Errorf("expected RegisterRequest")
 	}
 
-	node, err := sv.App.RegisterNode(stream.Context(), register.Name, register.Codecs, time.Now())
+	node, err := sv.Service.RegisterNode(register.Name, register.Codecs, time.Now())
 	if err != nil {
 		log.Printf("Error registering node: %v", err)
 		return nil, nil, err

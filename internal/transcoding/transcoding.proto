@@ -121,5 +121,4 @@ message EnqueueJobResponse {
   string job_id = 1;
   bool success = 2;
   string message = 3;
-  string assigned_node_id = 4;
 }

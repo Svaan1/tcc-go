@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/svaan1/go-tcc/internal/app"
+	"github.com/svaan1/go-tcc/internal/ffmpeg"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -27,7 +28,7 @@ type Server struct {
 	pb.VideoTranscodingServer
 
 	Config    ServerConfig
-	App       *app.Service
+	Service   *app.Service
 	NodeConns map[uuid.UUID]*NodeConn
 
 	listener *net.Listener
@@ -42,7 +43,7 @@ func New(address string) *Server {
 
 			ResourceUsagePollingTimeout: 10 * time.Second,
 		},
-		App:       app.NewService(),
+		Service:   app.NewService(),
 		NodeConns: map[uuid.UUID]*NodeConn{},
 		listener:  nil,
 	}
@@ -74,34 +75,9 @@ func (sv *Server) Serve() error {
 	return nil
 }
 
-func (sv *Server) trackTimedOutNodes() {
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		now := time.Now()
-		ids := sv.App.TimedOutIDs(now, sv.Config.ResourceUsagePollingTimeout)
-		if len(ids) == 0 {
-			continue
-		}
-
-		sv.mu.Lock()
-		for _, id := range ids {
-			if conn, ok := sv.NodeConns[id]; ok {
-				select {
-				case <-conn.closedChan:
-				default:
-					close(conn.closedChan)
-				}
-			}
-		}
-		sv.mu.Unlock()
-	}
-}
-
 // GetAllNodes returns all registered nodes with their current resource usage
 func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (*pb.GetAllNodesResponse, error) {
-	nodes := sv.App.ListNodes(ctx)
+	nodes := sv.Service.ListNodes()
 
 	nodeInfos := make([]*pb.NodeInfo, len(nodes))
 	for i, node := range nodes {
@@ -127,63 +103,53 @@ func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*p
 	jobID := uuid.New().String()
 
 	// Pick an available node for the job
-	nodeID, err := sv.App.PickNodeForJob(ctx)
+	_, err := sv.Service.EnqueueJob(&ffmpeg.EncodingParams{
+		InputPath:  req.InputPath,
+		OutputPath: req.OutputPath,
+		VideoCodec: req.VideoCodec,
+		AudioCodec: req.AudioCodec,
+		Crf:        req.Crf,
+		Preset:     req.Preset,
+	})
+
 	if err != nil {
 		return &pb.EnqueueJobResponse{
 			JobId:   jobID,
 			Success: false,
-			Message: fmt.Sprintf("No available nodes for job: %v", err),
+			Message: fmt.Sprintf("Failed to enqueue job: %v", err),
 		}, nil
 	}
 
-	// Find the node connection to send the job assignment
-	sv.mu.RLock()
-	nodeConn, exists := sv.NodeConns[nodeID]
-	sv.mu.RUnlock()
-
-	if !exists {
-		return &pb.EnqueueJobResponse{
-			JobId:   jobID,
-			Success: false,
-			Message: "Selected node is not connected",
-		}, nil
-	}
-
-	// Create job assignment request
-	jobAssignment := &pb.OrchestratorMessage{
-		Base: &pb.MessageBase{
-			MessageId: "job-assignment-" + jobID,
-			Timestamp: timestamppb.Now(),
-		},
-		Payload: &pb.OrchestratorMessage_JobAssignmentRequest{
-			JobAssignmentRequest: &pb.JobAssignmentRequest{
-				JobId:      jobID,
-				InputPath:  req.InputPath,
-				OutputPath: req.OutputPath,
-				Crf:        req.Crf,
-				Preset:     req.Preset,
-				AudioCodec: req.AudioCodec,
-				VideoCodec: req.VideoCodec,
-			},
-		},
-	}
-
-	// Send job assignment to the selected node
-	err = nodeConn.stream.Send(jobAssignment)
-	if err != nil {
-		return &pb.EnqueueJobResponse{
-			JobId:   jobID,
-			Success: false,
-			Message: fmt.Sprintf("Failed to send job to node: %v", err),
-		}, nil
-	}
-
-	log.Printf("Job %s assigned to node %s", jobID, nodeID.String())
+	log.Printf("Job %s enqueued", jobID)
 
 	return &pb.EnqueueJobResponse{
-		JobId:          jobID,
-		Success:        true,
-		Message:        "Job successfully enqueued and assigned",
-		AssignedNodeId: nodeID.String(),
+		JobId:   jobID,
+		Success: true,
+		Message: "Job successfully enqueued",
 	}, nil
+}
+
+func (sv *Server) trackTimedOutNodes() {
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		now := time.Now()
+		ids := sv.Service.GetTimedOutNodes(now, sv.Config.ResourceUsagePollingTimeout)
+		if len(ids) == 0 {
+			continue
+		}
+
+		sv.mu.Lock()
+		for _, id := range ids {
+			if conn, ok := sv.NodeConns[id]; ok {
+				select {
+				case <-conn.closedChan:
+				default:
+					close(conn.closedChan)
+				}
+			}
+		}
+		sv.mu.Unlock()
+	}
 }

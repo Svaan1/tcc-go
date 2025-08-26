@@ -3,12 +3,18 @@ package ffmpeg
 import (
 	"fmt"
 	"os/exec"
-
-	pb "github.com/svaan1/go-tcc/internal/transcoding"
 )
 
-// Encode executes ffmpeg with the parameters from JobAssignmentRequest
-func Encode(req *pb.JobAssignmentRequest) error {
+type EncodingParams struct {
+	InputPath  string
+	OutputPath string
+	VideoCodec string
+	AudioCodec string
+	Crf        string
+	Preset     string
+}
+
+func Encode(req *EncodingParams) error {
 	args := []string{
 		"-i", req.InputPath,
 	}

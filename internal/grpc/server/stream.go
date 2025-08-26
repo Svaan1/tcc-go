@@ -17,7 +17,12 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	}
 
 	defer func() {
-		sv.App.RemoveNode(node.ID)
+		sv.Service.RemoveNode(node.ID)
+
+		sv.mu.Lock()
+		delete(sv.NodeConns, node.ID)
+		sv.mu.Unlock()
+
 		log.Printf("Node %s (%s) disconnected", node.Name, node.ID.String())
 	}()
 
@@ -41,16 +46,15 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 			log.Printf("Received message from node %s - Message ID: %s, Timestamp: %v",
 				node.Name, msg.Base.MessageId, msg.Base.Timestamp.AsTime())
 
+			ts := msg.Base.Timestamp.AsTime()
+
 			switch payload := msg.Payload.(type) {
 			case *pb.NodeMessage_ResourceUsageRequest:
-				ts := msg.Base.Timestamp.AsTime()
-
-				_ = sv.App.UpdateResourceUsage(stream.Context(), node.ID,
-					app.ResourceUsage{
-						CPUPercent:    payload.ResourceUsageRequest.CpuPercent,
-						MemoryPercent: payload.ResourceUsageRequest.MemoryPercent,
-						DiskPercent:   payload.ResourceUsageRequest.DiskPercent,
-					}, ts)
+				_ = sv.Service.UpdateResourceUsage(node.ID, app.ResourceUsage{
+					CPUPercent:    payload.ResourceUsageRequest.CpuPercent,
+					MemoryPercent: payload.ResourceUsageRequest.MemoryPercent,
+					DiskPercent:   payload.ResourceUsageRequest.DiskPercent,
+				}, ts)
 			case *pb.NodeMessage_JobAssignmentResponse:
 				log.Printf("Job assignment response: job_id=%s, accepted=%t, message=%s",
 					payload.JobAssignmentResponse.JobId,
