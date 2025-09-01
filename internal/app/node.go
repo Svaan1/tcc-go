@@ -24,12 +24,16 @@ type Node struct {
 }
 
 type NodeManager struct {
+	ResourceUsagePollingTimeout time.Duration
+
 	nodes map[uuid.UUID]*Node
 	mu    sync.RWMutex
 }
 
 func NewNodeManager() *NodeManager {
 	return &NodeManager{
+		ResourceUsagePollingTimeout: 10 * time.Second,
+
 		nodes: make(map[uuid.UUID]*Node),
 	}
 }
@@ -89,11 +93,11 @@ func (nm *NodeManager) UpdateResourceUsage(id uuid.UUID, usage ResourceUsage, ts
 	return nil
 }
 
-func (nm *NodeManager) GetTimedOutNodes(now time.Time, timeout time.Duration) []uuid.UUID {
+func (nm *NodeManager) GetTimedOutNodes(now time.Time) []uuid.UUID {
 	nm.mu.RLock()
 	ids := make([]uuid.UUID, 0)
 	for id, n := range nm.nodes {
-		if now.Sub(n.ResourceUsage.Timestamp) > timeout {
+		if now.Sub(n.ResourceUsage.Timestamp) > nm.ResourceUsagePollingTimeout {
 			ids = append(ids, id)
 		}
 	}

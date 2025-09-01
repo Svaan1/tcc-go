@@ -38,8 +38,8 @@ func (s *Service) UpdateResourceUsage(id uuid.UUID, usage ResourceUsage, ts time
 	return s.nodeManager.UpdateResourceUsage(id, usage, ts)
 }
 
-func (s *Service) GetTimedOutNodes(now time.Time, timeout time.Duration) []uuid.UUID {
-	return s.nodeManager.GetTimedOutNodes(now, timeout)
+func (s *Service) GetTimedOutNodes(now time.Time) []uuid.UUID {
+	return s.nodeManager.GetTimedOutNodes(now)
 }
 
 // Job management methods (delegated to JobQueue)

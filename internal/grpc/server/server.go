@@ -20,8 +20,6 @@ import (
 type ServerConfig struct {
 	Network string
 	Address string
-
-	ResourceUsagePollingTimeout time.Duration
 }
 
 type Server struct {
@@ -31,8 +29,7 @@ type Server struct {
 	Service   *app.Service
 	NodeConns map[uuid.UUID]*NodeConn
 
-	listener *net.Listener
-	mu       sync.RWMutex
+	mu sync.RWMutex
 }
 
 func New(address string) *Server {
@@ -40,12 +37,9 @@ func New(address string) *Server {
 		Config: ServerConfig{
 			Network: "tcp",
 			Address: address,
-
-			ResourceUsagePollingTimeout: 10 * time.Second,
 		},
 		Service:   app.NewService(),
 		NodeConns: map[uuid.UUID]*NodeConn{},
-		listener:  nil,
 	}
 
 }
@@ -55,8 +49,6 @@ func (sv *Server) Serve() error {
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s %s: %w", sv.Config.Network, sv.Config.Address, err)
 	}
-
-	sv.listener = &listener
 
 	log.Printf("Server listening on %s %s", sv.Config.Network, sv.Config.Address)
 
@@ -135,7 +127,7 @@ func (sv *Server) trackTimedOutNodes() {
 
 	for range ticker.C {
 		now := time.Now()
-		ids := sv.Service.GetTimedOutNodes(now, sv.Config.ResourceUsagePollingTimeout)
+		ids := sv.Service.GetTimedOutNodes(now)
 		if len(ids) == 0 {
 			continue
 		}
