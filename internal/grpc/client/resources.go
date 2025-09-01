@@ -5,39 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/mem"
+	"github.com/svaan1/go-tcc/internal/app"
 	pb "github.com/svaan1/go-tcc/internal/transcoding"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-func GetCPU() (float64, error) {
-	stat, err := cpu.Percent(0, false)
-	if err != nil {
-		return 0, err
-	}
-
-	return stat[0], nil
-}
-
-func GetMemory() (float64, error) {
-	stat, err := mem.VirtualMemory()
-	if err != nil {
-		return 0, err
-	}
-
-	return stat.UsedPercent, nil
-}
-
-func GetDisk() (float64, error) {
-	stat, err := disk.Usage("/")
-	if err != nil {
-		return 0, err
-	}
-
-	return stat.UsedPercent, nil
-}
 
 func (c *Client) handleResourceUsagePolling(ctx context.Context) {
 	ticker := time.NewTicker(c.Config.ResourceUsagePollingTickTime)
@@ -48,21 +19,10 @@ func (c *Client) handleResourceUsagePolling(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			cpu, err := GetCPU()
-			if err != nil {
-				log.Println("Failed to get CPU usage", err)
-				continue
-			}
 
-			mem, err := GetMemory()
+			resources, err := app.GetAvailableResources()
 			if err != nil {
-				log.Println("Failed to get Memory usage", err)
-				continue
-			}
-
-			disk, err := GetDisk()
-			if err != nil {
-				log.Println("Failed to get Disk usage", err)
+				log.Printf("Failed to fetch available resources: %v", err)
 				continue
 			}
 
@@ -75,9 +35,9 @@ func (c *Client) handleResourceUsagePolling(ctx context.Context) {
 				Payload: &pb.NodeMessage_ResourceUsageRequest{
 					ResourceUsageRequest: &pb.ResourceUsageRequest{
 						NodeId:        c.nodeID,
-						CpuPercent:    cpu,
-						MemoryPercent: mem,
-						DiskPercent:   disk,
+						CpuPercent:    resources.CPUUsagePercent,
+						MemoryPercent: resources.MemoryUsagePercent,
+						DiskPercent:   resources.DiskUsagePercent,
 					},
 				},
 			}
@@ -89,7 +49,7 @@ func (c *Client) handleResourceUsagePolling(ctx context.Context) {
 			}
 
 			log.Printf("Sent resource usage: CPU=%.2f%%, Memory=%.2f%%, Disk=%.2f%%",
-				cpu, mem, disk)
+				resources.CPUUsagePercent, resources.MemoryUsagePercent, resources.DiskUsagePercent)
 		}
 	}
 }
