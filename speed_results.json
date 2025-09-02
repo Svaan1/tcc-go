@@ -1,23 +1,16 @@
 {
-  "nvenc_h264": {
-    "codec": "nvenc_h264",
-    "encode_time": 3.923077456,
-    "decode_time": 1.9338244869999999,
-    "fps": 0,
-    "score": 7.3211274287500006
-  },
   "x264_fast": {
     "codec": "x264_fast",
-    "encode_time": 18.746214142,
-    "decode_time": 2.440670737,
+    "encode_time": 33.028630454,
+    "decode_time": 3.017884321,
     "fps": 0,
-    "score": 21.186884879
+    "score": 36.046514775
   },
   "x264_medium": {
     "codec": "x264_medium",
-    "encode_time": 20.002427798,
-    "decode_time": 2.418393957,
+    "encode_time": 35.57440402,
+    "decode_time": 2.983975622,
     "fps": 0,
-    "score": 18.684018129166667
+    "score": 32.131983035000005
   }
 }
