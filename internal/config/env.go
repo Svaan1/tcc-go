@@ -1,11 +1,20 @@
 package config
 
-import "github.com/svaan1/go-tcc/pkg/utils"
+import (
+	"os"
+)
 
 var (
-	ServerHostName = utils.GetEnv("SERVER_HOSTNAME", "localhost")
-	ServerPortGRPC = utils.GetEnv("SERVER_PORT_GRPC", "8080")
+	ServerHostName = GetEnv("SERVER_HOSTNAME", "localhost")
+	ServerPortGRPC = GetEnv("SERVER_PORT_GRPC", "8080")
 
-	ClientName   = utils.GetEnv("NODE_NAME", "node")
-	ClientCodecs = utils.GetEnv("CODECS", "x264;x265")
+	ClientName   = GetEnv("NODE_NAME", "node")
+	ClientCodecs = GetEnv("CODECS", "x264;x265")
 )
+
+func GetEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
+}
