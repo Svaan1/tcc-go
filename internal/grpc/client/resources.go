@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/svaan1/go-tcc/internal/app"
-	pb "github.com/svaan1/go-tcc/internal/transcoding"
+	pb "github.com/svaan1/go-tcc/internal/grpc/transcoding"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

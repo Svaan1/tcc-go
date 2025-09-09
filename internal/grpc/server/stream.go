@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/svaan1/go-tcc/internal/app"
-	pb "github.com/svaan1/go-tcc/internal/transcoding"
+	pb "github.com/svaan1/go-tcc/internal/grpc/transcoding"
 )
 
 func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {

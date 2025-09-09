@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/svaan1/go-tcc/internal/app"
 	"github.com/svaan1/go-tcc/internal/ffmpeg"
-	pb "github.com/svaan1/go-tcc/internal/transcoding"
+	pb "github.com/svaan1/go-tcc/internal/grpc/transcoding"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/types/known/timestamppb"

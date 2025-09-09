@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/svaan1/go-tcc/internal/transcoding"
+	pb "github.com/svaan1/go-tcc/internal/grpc/transcoding"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"

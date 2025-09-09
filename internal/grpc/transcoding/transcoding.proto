@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package transcoding;
 
-option go_package = "github.com/svaan1/go-tcc/internal/transcoding";
+option go_package = "github.com/svaan1/go-tcc/internal/grpc/transcoding";
 
 import "google/protobuf/timestamp.proto";
 
