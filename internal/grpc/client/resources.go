@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/svaan1/go-tcc/internal/app"
 	pb "github.com/svaan1/go-tcc/internal/grpc/transcoding"
+	"github.com/svaan1/go-tcc/internal/metrics"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -20,7 +20,7 @@ func (c *Client) handleResourceUsagePolling(ctx context.Context) {
 			return
 		case <-ticker.C:
 
-			resources, err := app.GetAvailableResources()
+			resources, err := metrics.GetHostAvailableResources()
 			if err != nil {
 				log.Printf("Failed to fetch available resources: %v", err)
 				continue

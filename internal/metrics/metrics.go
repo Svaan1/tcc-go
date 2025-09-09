@@ -1,4 +1,4 @@
-package app
+package metrics
 
 import (
 	"os"
@@ -12,14 +12,6 @@ type ResourcePolling struct {
 	CPUUsagePercent    float64 `json:"cpu_usage_percent"`
 	MemoryUsagePercent float64 `json:"memory_usage_percent"`
 	DiskUsagePercent   float64 `json:"disk_usage_percent"`
-}
-
-func readInt64(path string) (int64, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return 0, err
-	}
-	return strconv.ParseInt(strings.TrimSpace(string(data)), 10, 64)
 }
 
 func getContainerCPUPercent(interval time.Duration) (float64, error) {
@@ -144,7 +136,7 @@ func GetContainerAvailableResources() (ResourcePolling, error) {
 	}, nil
 }
 
-func GetAvailableResources() (ResourcePolling, error) {
+func GetHostAvailableResources() (ResourcePolling, error) {
 	cpu, err := getSystemCPUPercent()
 	if err != nil {
 		return ResourcePolling{}, err
@@ -165,4 +157,11 @@ func GetAvailableResources() (ResourcePolling, error) {
 		MemoryUsagePercent: memory,
 		DiskUsagePercent:   disk,
 	}, nil
+}
+
+func IsRunningInDocker() bool {
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		return true
+	}
+	return false
 }
