@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	sample, err := ffmpeg.GenerateVideoSample(50, "1920x1080")
+	sample, err := ffmpeg.GenerateVideoSample(5000, "1920x1080")
 	if err != nil {
 		log.Fatalf("Failed to generate video sample %v", err)
 	}
