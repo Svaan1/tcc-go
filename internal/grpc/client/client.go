@@ -85,13 +85,47 @@ func (c *Client) Close() error {
 		}
 
 		if err := c.stream.Send(disconnectMsg); err != nil {
-			log.Printf("Failed to send disconnect message: %v", err)
+			return err
 		}
 	}
 
 	if c.conn != nil {
 		return c.conn.Close()
 	}
+
+	return nil
+}
+
+func (c *Client) register(stream grpc.BidiStreamingClient[pb.NodeMessage, pb.OrchestratorMessage], name string, codecs []string) error {
+	registerMsg := &pb.NodeMessage{
+		Base: &pb.MessageBase{
+			MessageId: "register-" + name,
+			Timestamp: timestamppb.Now(),
+		},
+		Payload: &pb.NodeMessage_RegisterRequest{
+			RegisterRequest: &pb.RegisterRequest{
+				Name:   name,
+				Codecs: codecs,
+			},
+		},
+	}
+
+	if err := stream.Send(registerMsg); err != nil {
+		return err
+	}
+
+	response, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+
+	registerResponse := response.GetRegisterResponse()
+	if registerResponse == nil || !registerResponse.Success {
+		return err
+	}
+
+	c.nodeID = registerResponse.NodeId
+	c.stream = stream
 
 	return nil
 }

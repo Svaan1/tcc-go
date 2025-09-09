@@ -12,3 +12,10 @@ protoc --go_out=. --go_opt=paths=source_relative \
 - client benchmark
 - grafana
 - queue + lb
+
+Resource aware scheduling
+
+- Codec-specific performance
+- Current workload/queue depth
+- Network proximity
+- Historical reliability

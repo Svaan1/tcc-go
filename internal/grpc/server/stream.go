@@ -13,13 +13,13 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 
 	node, nodeConn, err := sv.RegisterNode(stream)
 	if err != nil {
+		log.Printf("Failed to register node: %v", err)
 		return err
 	}
 
 	defer func() {
-		sv.Service.RemoveNode(node.ID)
-
 		sv.mu.Lock()
+		sv.Service.RemoveNode(node.ID)
 		delete(sv.NodeConns, node.ID)
 		sv.mu.Unlock()
 
