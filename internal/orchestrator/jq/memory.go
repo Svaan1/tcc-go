@@ -1,4 +1,4 @@
-package app
+package jq
 
 import (
 	"errors"
@@ -8,35 +8,20 @@ import (
 	"github.com/svaan1/go-tcc/internal/ffmpeg"
 )
 
-type JobStatus int
+type InMemoryJobQueue struct {
+	JobQueue
 
-const (
-	JobStatusPending JobStatus = iota
-	JobStatusAssigned
-	JobStatusRunning
-	JobStatusCompleted
-	JobStatusFailed
-)
-
-type Job struct {
-	ID           uuid.UUID
-	Params       *ffmpeg.EncodingParams
-	Status       JobStatus
-	AssignedNode *uuid.UUID // nil if not assigned
-}
-
-type JobQueue struct {
 	jobs []*Job
 	mu   sync.RWMutex
 }
 
-func NewJobQueue() *JobQueue {
-	return &JobQueue{
+func NewInMemoryJobQueue() *InMemoryJobQueue {
+	return &InMemoryJobQueue{
 		jobs: []*Job{},
 	}
 }
 
-func (jq *JobQueue) Enqueue(params *ffmpeg.EncodingParams) (*Job, error) {
+func (jq *InMemoryJobQueue) Enqueue(params *ffmpeg.EncodingParams) (*Job, error) {
 	job := &Job{
 		ID:     uuid.New(),
 		Params: params,
@@ -50,7 +35,7 @@ func (jq *JobQueue) Enqueue(params *ffmpeg.EncodingParams) (*Job, error) {
 	return job, nil
 }
 
-func (jq *JobQueue) GetNextPendingJob() *Job {
+func (jq *InMemoryJobQueue) GetNextPendingJob() *Job {
 	jq.mu.Lock()
 	defer jq.mu.Unlock()
 
@@ -62,7 +47,7 @@ func (jq *JobQueue) GetNextPendingJob() *Job {
 	return nil
 }
 
-func (jq *JobQueue) UpdateJobStatus(jobID uuid.UUID, status JobStatus) error {
+func (jq *InMemoryJobQueue) UpdateJobStatus(jobID uuid.UUID, status JobStatus) error {
 	jq.mu.Lock()
 	defer jq.mu.Unlock()
 
@@ -75,7 +60,7 @@ func (jq *JobQueue) UpdateJobStatus(jobID uuid.UUID, status JobStatus) error {
 	return errors.New("job not found")
 }
 
-func (jq *JobQueue) GetJob(jobID uuid.UUID) (*Job, bool) {
+func (jq *InMemoryJobQueue) GetJob(jobID uuid.UUID) (*Job, bool) {
 	jq.mu.RLock()
 	defer jq.mu.RUnlock()
 
@@ -87,7 +72,7 @@ func (jq *JobQueue) GetJob(jobID uuid.UUID) (*Job, bool) {
 	return nil, false
 }
 
-func (jq *JobQueue) ListJobs() []*Job {
+func (jq *InMemoryJobQueue) ListJobs() []*Job {
 	jq.mu.RLock()
 	defer jq.mu.RUnlock()
 
