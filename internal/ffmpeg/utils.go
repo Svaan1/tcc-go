@@ -14,10 +14,10 @@ func extractFPS(output string) (float64, error) {
 	if len(matches) > 1 {
 		fps, err := strconv.ParseFloat(matches[1], 64)
 		if err != nil {
-			return 0.0, fmt.Errorf("Failed to convert fps to float %v", err)
+			return 0.0, fmt.Errorf("failed to convert fps to float %v", err)
 		}
 
 		return fps, nil
 	}
-	return 0.0, errors.New("could not find fps in string.")
+	return 0.0, errors.New("could not find fps in string")
 }
