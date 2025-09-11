@@ -2,10 +2,10 @@ package jq
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/svaan1/go-tcc/internal/ffmpeg"
 )
 
 type InMemoryJobQueue struct {
@@ -21,18 +21,12 @@ func NewInMemoryJobQueue() *InMemoryJobQueue {
 	}
 }
 
-func (jq *InMemoryJobQueue) Enqueue(params *ffmpeg.EncodingParams) (*Job, error) {
-	job := &Job{
-		ID:     uuid.New(),
-		Params: params,
-		Status: JobStatusPending,
-	}
-
+func (jq *InMemoryJobQueue) Enqueue(job *Job) error {
 	jq.mu.Lock()
 	defer jq.mu.Unlock()
 
 	jq.jobs = append(jq.jobs, job)
-	return job, nil
+	return nil
 }
 
 func (jq *InMemoryJobQueue) GetNextPendingJob() *Job {
@@ -60,16 +54,17 @@ func (jq *InMemoryJobQueue) UpdateJobStatus(jobID uuid.UUID, status JobStatus) e
 	return errors.New("job not found")
 }
 
-func (jq *InMemoryJobQueue) GetJob(jobID uuid.UUID) (*Job, bool) {
+func (jq *InMemoryJobQueue) GetJob(jobID uuid.UUID) (*Job, error) {
 	jq.mu.RLock()
 	defer jq.mu.RUnlock()
 
 	for _, job := range jq.jobs {
 		if job.ID == jobID {
-			return job, true
+			return job, nil
 		}
 	}
-	return nil, false
+
+	return nil, fmt.Errorf("job not found")
 }
 
 func (jq *InMemoryJobQueue) ListJobs() []*Job {

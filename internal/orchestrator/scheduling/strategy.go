@@ -1,8 +1,8 @@
 package scheduling
 
 import (
-	"github.com/svaan1/go-tcc/internal/orchestrator/jq"
-	"github.com/svaan1/go-tcc/internal/orchestrator/np"
+	"github.com/svaan1/tcc-go/internal/orchestrator/jq"
+	"github.com/svaan1/tcc-go/internal/orchestrator/np"
 )
 
 type NodeScore struct {

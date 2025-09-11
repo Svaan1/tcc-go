@@ -4,8 +4,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/svaan1/go-tcc/internal/config"
-	"github.com/svaan1/go-tcc/internal/grpc/server"
+	"github.com/svaan1/tcc-go/internal/config"
+	"github.com/svaan1/tcc-go/internal/grpc/server"
 )
 
 func main() {

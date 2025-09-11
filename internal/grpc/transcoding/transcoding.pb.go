@@ -7,12 +7,13 @@
 package transcoding
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -1217,7 +1218,7 @@ const file_internal_grpc_transcoding_transcoding_proto_rawDesc = "" +
 	"\x06Stream\x12\x18.transcoding.NodeMessage\x1a .transcoding.OrchestratorMessage(\x010\x01\x12P\n" +
 	"\vGetAllNodes\x12\x1f.transcoding.GetAllNodesRequest\x1a .transcoding.GetAllNodesResponse\x12M\n" +
 	"\n" +
-	"EnqueueJob\x12\x1e.transcoding.EnqueueJobRequest\x1a\x1f.transcoding.EnqueueJobResponseB4Z2github.com/svaan1/go-tcc/internal/grpc/transcodingb\x06proto3"
+	"EnqueueJob\x12\x1e.transcoding.EnqueueJobRequest\x1a\x1f.transcoding.EnqueueJobResponseB4Z2github.com/svaan1/tcc-go/internal/grpc/transcodingb\x06proto3"
 
 var (
 	file_internal_grpc_transcoding_transcoding_proto_rawDescOnce sync.Once

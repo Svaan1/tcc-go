@@ -8,10 +8,11 @@ import (
 	"time"
 )
 
-type ResourcePolling struct {
-	CPUUsagePercent    float64 `json:"cpu_usage_percent"`
-	MemoryUsagePercent float64 `json:"memory_usage_percent"`
-	DiskUsagePercent   float64 `json:"disk_usage_percent"`
+type ResourceUsage struct {
+	CPUUsagePercent    float64   `json:"cpu_usage_percent"`
+	MemoryUsagePercent float64   `json:"memory_usage_percent"`
+	DiskUsagePercent   float64   `json:"disk_usage_percent"`
+	Timestamp          time.Time `json:"timestamp"`
 }
 
 func getContainerCPUPercent(interval time.Duration) (float64, error) {
@@ -113,49 +114,51 @@ func getSystemCPUPercent() (float64, error) {
 	return (1.0 - float64(idleDelta)/float64(totalDelta)) * 100, nil
 }
 
-func GetContainerAvailableResources() (ResourcePolling, error) {
+func GetContainerAvailableResources() (ResourceUsage, error) {
 	cpu, err := getContainerCPUPercent(time.Second)
 	if err != nil {
-		return ResourcePolling{}, err
+		return ResourceUsage{}, err
 	}
 
 	memory, err := getMemoryUsagePercent()
 	if err != nil {
-		return ResourcePolling{}, err
+		return ResourceUsage{}, err
 	}
 
 	disk, err := getDiskUsagePercent("/")
 	if err != nil {
-		return ResourcePolling{}, err
+		return ResourceUsage{}, err
 	}
 
-	return ResourcePolling{
+	return ResourceUsage{
 		CPUUsagePercent:    cpu,
 		MemoryUsagePercent: memory,
 		DiskUsagePercent:   disk,
+		Timestamp:          time.Now(),
 	}, nil
 }
 
-func GetHostAvailableResources() (ResourcePolling, error) {
+func GetHostAvailableResources() (ResourceUsage, error) {
 	cpu, err := getSystemCPUPercent()
 	if err != nil {
-		return ResourcePolling{}, err
+		return ResourceUsage{}, err
 	}
 
 	memory, err := getMemoryUsagePercent()
 	if err != nil {
-		return ResourcePolling{}, err
+		return ResourceUsage{}, err
 	}
 
 	disk, err := getDiskUsagePercent("/")
 	if err != nil {
-		return ResourcePolling{}, err
+		return ResourceUsage{}, err
 	}
 
-	return ResourcePolling{
+	return ResourceUsage{
 		CPUUsagePercent:    cpu,
 		MemoryUsagePercent: memory,
 		DiskUsagePercent:   disk,
+		Timestamp:          time.Now(),
 	}, nil
 }
 

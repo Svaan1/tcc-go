@@ -9,8 +9,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/svaan1/go-tcc/internal/config"
-	"github.com/svaan1/go-tcc/internal/grpc/client"
+	"github.com/svaan1/tcc-go/internal/config"
+	"github.com/svaan1/tcc-go/internal/grpc/client"
 )
 
 func main() {

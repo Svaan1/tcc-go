@@ -13,8 +13,8 @@ type Codec struct {
 	Params []string `json:"params"`
 }
 
-type BenchmarkResult struct {
-	Codec      string  `json:"codec"`
+type CodecBenchmark struct {
+	Codec      Codec   `json:"codec"`
 	EncodeTime float64 `json:"encode_time"`
 	DecodeTime float64 `json:"decode_time"`
 	FPS        float64 `json:"fps"`
@@ -36,7 +36,7 @@ func GenerateVideoSample(duration int, resolution string) (string, error) {
 	return testFile, nil
 }
 
-func BenchmarkCodec(codec Codec, weight float64, inputVideo string) (BenchmarkResult, error) {
+func BenchmarkCodec(codec Codec, weight float64, inputVideo string) (CodecBenchmark, error) {
 	tempDir := os.TempDir()
 	outputFile := filepath.Join(tempDir, fmt.Sprintf("out_%s_%d.mp4", codec.Name, time.Now().Unix()))
 	defer os.Remove(outputFile)
@@ -51,12 +51,12 @@ func BenchmarkCodec(codec Codec, weight float64, inputVideo string) (BenchmarkRe
 	encodeTime := time.Since(start).Seconds()
 
 	if err != nil {
-		return BenchmarkResult{}, fmt.Errorf("encoding failed: %w", err)
+		return CodecBenchmark{}, fmt.Errorf("encoding failed: %w", err)
 	}
 
 	fps, err := extractFPS(string(output))
 	if err != nil {
-		return BenchmarkResult{}, fmt.Errorf("failed to extract fps %v", err)
+		return CodecBenchmark{}, fmt.Errorf("failed to extract fps %v", err)
 	}
 
 	// Decode benchmark
@@ -71,7 +71,8 @@ func BenchmarkCodec(codec Codec, weight float64, inputVideo string) (BenchmarkRe
 	// Calculate score (encode + decode time, weighted)
 	score := (encodeTime + decodeTime) / weight
 
-	return BenchmarkResult{
+	return CodecBenchmark{
+		Codec:      codec,
 		EncodeTime: encodeTime,
 		DecodeTime: decodeTime,
 		FPS:        fps,

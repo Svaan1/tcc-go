@@ -3,8 +3,8 @@ package scheduling
 import (
 	"fmt"
 
-	"github.com/svaan1/go-tcc/internal/orchestrator/jq"
-	"github.com/svaan1/go-tcc/internal/orchestrator/np"
+	"github.com/svaan1/tcc-go/internal/orchestrator/jq"
+	"github.com/svaan1/tcc-go/internal/orchestrator/np"
 )
 
 // NodeScheduler implements the strategy for choosing optimal nodes

@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/svaan1/go-tcc/internal/app"
-	"github.com/svaan1/go-tcc/internal/ffmpeg"
-	pb "github.com/svaan1/go-tcc/internal/grpc/transcoding"
+	"github.com/svaan1/tcc-go/internal/ffmpeg"
+	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
+	"github.com/svaan1/tcc-go/internal/orchestrator"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -26,7 +26,7 @@ type Server struct {
 	pb.VideoTranscodingServer
 
 	Config    ServerConfig
-	Service   *app.Service
+	Service   *orchestrator.Service
 	NodeConns map[uuid.UUID]*NodeConn
 
 	mu sync.RWMutex
@@ -38,7 +38,7 @@ func New(address string) *Server {
 			Network: "tcp",
 			Address: address,
 		},
-		Service:   app.NewService(),
+		Service:   orchestrator.NewService(),
 		NodeConns: map[uuid.UUID]*NodeConn{},
 	}
 
@@ -76,10 +76,10 @@ func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (
 		nodeInfos[i] = &pb.NodeInfo{
 			NodeId:        node.ID.String(),
 			Name:          node.Name,
-			Codecs:        node.Codecs,
-			CpuPercent:    node.ResourceUsage.CPUPercent,
-			MemoryPercent: node.ResourceUsage.MemoryPercent,
-			DiskPercent:   node.ResourceUsage.DiskPercent,
+			Codecs:        make([]string, 0), // TODO
+			CpuPercent:    node.ResourceUsage.CPUUsagePercent,
+			MemoryPercent: node.ResourceUsage.MemoryUsagePercent,
+			DiskPercent:   node.ResourceUsage.DiskUsagePercent,
 			LastSeen:      timestamppb.New(node.ResourceUsage.Timestamp),
 		}
 	}
@@ -95,7 +95,7 @@ func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*p
 	jobID := uuid.New().String()
 
 	// Pick an available node for the job
-	_, err := sv.Service.EnqueueJob(&ffmpeg.EncodingParams{
+	err := sv.Service.EnqueueJob(&ffmpeg.EncodingParams{
 		InputPath:  req.InputPath,
 		OutputPath: req.OutputPath,
 		VideoCodec: req.VideoCodec,

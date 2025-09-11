@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/svaan1/go-tcc/internal/ffmpeg"
+	"github.com/svaan1/tcc-go/internal/ffmpeg"
 )
 
 func main() {

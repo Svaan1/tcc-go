@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/svaan1/go-tcc/internal/ffmpeg"
-	pb "github.com/svaan1/go-tcc/internal/grpc/transcoding"
+	"github.com/svaan1/tcc-go/internal/ffmpeg"
+	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

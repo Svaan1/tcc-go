@@ -1,11 +1,10 @@
 package jq
 
 import (
-	"context"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/svaan1/go-tcc/internal/ffmpeg"
+	"github.com/svaan1/tcc-go/internal/ffmpeg"
 )
 
 type JobStatus int
@@ -28,13 +27,12 @@ type Job struct {
 }
 
 type JobQueue interface {
-	Enqueue(ctx context.Context, job *Job) error
-	Dequeue(ctx context.Context) (*Job, error)
-	Peek(ctx context.Context) (*Job, error) // Look without removing
+	Enqueue(job *Job) error
+	Dequeue() (*Job, error)
+	UpdateStatus(jobID uuid.UUID, status JobStatus) error
 
-	UpdateStatus(ctx context.Context, jobID uuid.UUID, status JobStatus) error
-	GetJob(ctx context.Context, jobID uuid.UUID) (*Job, error)
-
-	ListJobs(ctx context.Context) ([]*Job, error)
-	GetQueueDepth(ctx context.Context) (int, error)
+	GetJob(jobID uuid.UUID) (*Job, error)
+	ListJobs() []*Job
+	Peek() (*Job, error)
+	GetQueueDepth() (int, error)
 }
