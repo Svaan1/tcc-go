@@ -1,4 +1,4 @@
-package scheduling
+package scheduler
 
 import (
 	"github.com/svaan1/tcc-go/internal/orchestrator/jq"

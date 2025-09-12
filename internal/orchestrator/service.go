@@ -14,15 +14,11 @@ type Service struct {
 	np np.NodePool
 }
 
-func NewService() *Service {
+func NewService(jq jq.JobQueue, np np.NodePool) *Service {
 	return &Service{
-		jq: jq.NewInMemoryJobQueue(),
-		np: np.NewInMemoryNodePool(),
+		jq: jq,
+		np: np,
 	}
-}
-
-func (s *Service) ListNodes() []*np.Node {
-	return nil
 }
 
 func (s *Service) RegisterNode(name string, codecs []string, ts time.Time) (*np.Node, error) {
@@ -30,6 +26,10 @@ func (s *Service) RegisterNode(name string, codecs []string, ts time.Time) (*np.
 }
 
 func (s *Service) UnregisterNode(ID uuid.UUID) error {
+	return nil
+}
+
+func (s *Service) ListNodes() []*np.Node {
 	return nil
 }
 

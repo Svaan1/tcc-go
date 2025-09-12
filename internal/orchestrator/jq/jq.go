@@ -1,6 +1,7 @@
 package jq
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,21 +19,21 @@ const (
 )
 
 type Job struct {
-	ID     uuid.UUID              `json:"id"`
-	Status JobStatus              `json:"status"`
-	Params *ffmpeg.EncodingParams `json:"params"`
-
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID            uuid.UUID              `json:"id"`
+	Status        JobStatus              `json:"status"`
+	Params        *ffmpeg.EncodingParams `json:"params"`
+	FailureReason string                 `json:"failure_reason,omitempty"`
+	CreatedAt     time.Time              `json:"created_at"`
+	UpdatedAt     time.Time              `json:"updated_at"`
 }
 
 type JobQueue interface {
-	Enqueue(job *Job) error
-	Dequeue() (*Job, error)
-	UpdateStatus(jobID uuid.UUID, status JobStatus) error
+	Enqueue(ctx context.Context, job *Job) error
+	Dequeue(ctx context.Context) (*Job, error)
+	Peek(ctx context.Context) (*Job, error)
 
-	GetJob(jobID uuid.UUID) (*Job, error)
-	ListJobs() []*Job
-	Peek() (*Job, error)
-	GetQueueDepth() (int, error)
+	ListJobs(ctx context.Context, offset, limit int) ([]*Job, error)
+	GetJob(ctx context.Context, jobID uuid.UUID) (*Job, error)
+	UpdateStatus(ctx context.Context, jobID uuid.UUID, status JobStatus, reason string) error
+	GetQueueDepth(ctx context.Context) (int, error)
 }

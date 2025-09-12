@@ -1,4 +1,4 @@
-package scheduling
+package scheduler
 
 import (
 	"fmt"
@@ -52,7 +52,3 @@ func (ns *NodeScheduler) SetStrategy(strategy SelectionStrategy) {
 func (ns *NodeScheduler) GetStrategy() SelectionStrategy {
 	return ns.strategy
 }
-
-// Learning and adaptation (TODO)
-// RecordJobResult( nodeID uuid.UUID, jobResult *JobResult) error
-// GetNodePerformanceHistory( nodeID uuid.UUID) (*PerformanceHistory, error)
