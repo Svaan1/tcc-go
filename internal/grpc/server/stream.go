@@ -1,12 +1,14 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
-	"time"
 
+	"github.com/svaan1/tcc-go/internal/ffmpeg"
 	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
+	"github.com/svaan1/tcc-go/internal/metrics"
 )
 
 func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
@@ -22,7 +24,7 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 		return fmt.Errorf("expected RegisterRequest but got different message type")
 	}
 
-	node, err := sv.Service.RegisterNode(register.Name, register.Codecs, time.Now())
+	node, err := sv.Service.RegisterNode(context.TODO(), register.Name, make([]ffmpeg.EncodingProfile, 0))
 	if err != nil {
 		return fmt.Errorf("failed to register node: %v", err)
 	}
@@ -39,7 +41,7 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 
 	defer func() {
 		sv.mu.Lock()
-		sv.Service.UnregisterNode(node.ID)
+		sv.Service.UnregisterNode(context.TODO(), node.ID)
 		delete(sv.NodeConns, node.ID)
 		sv.mu.Unlock()
 
@@ -66,11 +68,18 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 			log.Printf("Received message from node %s - Message ID: %s, Timestamp: %v",
 				node.Name, msg.Base.MessageId, msg.Base.Timestamp.AsTime())
 
-			ts := msg.Base.Timestamp.AsTime()
+			// ts := msg.Base.Timestamp.AsTime()
 
 			switch payload := msg.Payload.(type) {
 			case *pb.NodeMessage_ResourceUsageRequest:
-				log.Print(ts)
+				sv.Service.UpdateNodeMetrics(context.TODO(),
+					payload.ResourceUsageRequest.NodeId,
+					&metrics.ResourceUsage{
+						CPUUsagePercent:    payload.ResourceUsageRequest.CpuPercent,
+						MemoryUsagePercent: payload.ResourceUsageRequest.MemoryPercent,
+						DiskUsagePercent:   payload.ResourceUsageRequest.DiskPercent,
+					},
+				)
 			case *pb.NodeMessage_JobAssignmentResponse:
 				log.Printf("Job assignment response: job_id=%s, accepted=%t, message=%s",
 					payload.JobAssignmentResponse.JobId,

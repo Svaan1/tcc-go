@@ -69,7 +69,11 @@ func (sv *Server) Serve() error {
 
 // GetAllNodes returns all registered nodes with their current resource usage
 func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (*pb.GetAllNodesResponse, error) {
-	nodes := sv.Service.ListNodes()
+	nodes, err := sv.Service.ListNodes(context.TODO())
+
+	if err != nil {
+		return nil, err
+	}
 
 	nodeInfos := make([]*pb.NodeInfo, len(nodes))
 	for i, node := range nodes {
@@ -80,7 +84,7 @@ func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (
 			CpuPercent:    node.ResourceUsage.CPUUsagePercent,
 			MemoryPercent: node.ResourceUsage.MemoryUsagePercent,
 			DiskPercent:   node.ResourceUsage.DiskUsagePercent,
-			LastSeen:      timestamppb.New(node.ResourceUsage.Timestamp),
+			LastSeen:      timestamppb.New(node.HeartBeat),
 		}
 	}
 
@@ -94,8 +98,7 @@ func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (
 func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*pb.EnqueueJobResponse, error) {
 	jobID := uuid.New().String()
 
-	// Pick an available node for the job
-	err := sv.Service.EnqueueJob(&ffmpeg.EncodingParams{
+	err := sv.Service.EnqueueJob(ctx, &ffmpeg.EncodingParams{
 		InputPath:  req.InputPath,
 		OutputPath: req.OutputPath,
 		VideoCodec: req.VideoCodec,
@@ -126,15 +129,19 @@ func (sv *Server) trackTimedOutNodes() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		now := time.Now()
-		ids := sv.Service.GetTimedOutNodes(now)
-		if len(ids) == 0 {
+		nodes, err := sv.Service.GetTimedOutNodes(context.TODO(), 15*time.Second)
+
+		if err != nil {
+			log.Printf("Failed to get timed out nodes: %v", err)
+		}
+
+		if len(nodes) == 0 {
 			continue
 		}
 
 		sv.mu.Lock()
-		for _, id := range ids {
-			if conn, ok := sv.NodeConns[id]; ok {
+		for _, node := range nodes {
+			if conn, ok := sv.NodeConns[node.ID]; ok {
 				select {
 				case <-conn.closedChan:
 				default:

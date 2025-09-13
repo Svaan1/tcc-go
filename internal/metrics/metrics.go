@@ -9,10 +9,9 @@ import (
 )
 
 type ResourceUsage struct {
-	CPUUsagePercent    float64   `json:"cpu_usage_percent"`
-	MemoryUsagePercent float64   `json:"memory_usage_percent"`
-	DiskUsagePercent   float64   `json:"disk_usage_percent"`
-	Timestamp          time.Time `json:"timestamp"`
+	CPUUsagePercent    float64 `json:"cpu_usage_percent"`
+	MemoryUsagePercent float64 `json:"memory_usage_percent"`
+	DiskUsagePercent   float64 `json:"disk_usage_percent"`
 }
 
 func getContainerCPUPercent(interval time.Duration) (float64, error) {
@@ -134,7 +133,6 @@ func GetContainerAvailableResources() (ResourceUsage, error) {
 		CPUUsagePercent:    cpu,
 		MemoryUsagePercent: memory,
 		DiskUsagePercent:   disk,
-		Timestamp:          time.Now(),
 	}, nil
 }
 
@@ -158,7 +156,6 @@ func GetHostAvailableResources() (ResourceUsage, error) {
 		CPUUsagePercent:    cpu,
 		MemoryUsagePercent: memory,
 		DiskUsagePercent:   disk,
-		Timestamp:          time.Now(),
 	}, nil
 }
 

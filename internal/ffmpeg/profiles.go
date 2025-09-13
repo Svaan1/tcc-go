@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-type Codec struct {
+type EncodingProfile struct {
+	// Info
 	Name   string   `json:"name"`
+	Codec  string   `json:"codec"`
 	Params []string `json:"params"`
-}
 
-type CodecBenchmark struct {
-	Codec      Codec   `json:"codec"`
+	// Scores
 	EncodeTime float64 `json:"encode_time"`
 	DecodeTime float64 `json:"decode_time"`
 	FPS        float64 `json:"fps"`
@@ -36,13 +36,13 @@ func GenerateVideoSample(duration int, resolution string) (string, error) {
 	return testFile, nil
 }
 
-func BenchmarkCodec(codec Codec, weight float64, inputVideo string) (CodecBenchmark, error) {
+func GenerateEncodingProfile(name, codec string, params []string, weight float64, inputVideo string) (EncodingProfile, error) {
 	tempDir := os.TempDir()
-	outputFile := filepath.Join(tempDir, fmt.Sprintf("out_%s_%d.mp4", codec.Name, time.Now().Unix()))
+	outputFile := filepath.Join(tempDir, fmt.Sprintf("out_%s_%d.mp4", name, time.Now().Unix()))
 	defer os.Remove(outputFile)
 
 	// Encode benchmark
-	encodeArgs := append([]string{"-y", "-i", inputVideo}, codec.Params...)
+	encodeArgs := append([]string{"-y", "-i", inputVideo}, params...)
 	encodeArgs = append(encodeArgs, outputFile)
 	encodeCmd := exec.Command("ffmpeg", encodeArgs...)
 
@@ -51,12 +51,12 @@ func BenchmarkCodec(codec Codec, weight float64, inputVideo string) (CodecBenchm
 	encodeTime := time.Since(start).Seconds()
 
 	if err != nil {
-		return CodecBenchmark{}, fmt.Errorf("encoding failed: %w", err)
+		return EncodingProfile{}, fmt.Errorf("encoding failed: %w", err)
 	}
 
 	fps, err := extractFPS(string(output))
 	if err != nil {
-		return CodecBenchmark{}, fmt.Errorf("failed to extract fps %v", err)
+		return EncodingProfile{}, fmt.Errorf("failed to extract fps %v", err)
 	}
 
 	// Decode benchmark
@@ -71,7 +71,9 @@ func BenchmarkCodec(codec Codec, weight float64, inputVideo string) (CodecBenchm
 	// Calculate score (encode + decode time, weighted)
 	score := (encodeTime + decodeTime) / weight
 
-	return CodecBenchmark{
+	return EncodingProfile{
+		Name:       name,
+		Params:     params,
 		Codec:      codec,
 		EncodeTime: encodeTime,
 		DecodeTime: decodeTime,
