@@ -33,7 +33,6 @@ func (q *InMemoryJobQueue) Enqueue(ctx context.Context, job *Job) error {
 
 	job.CreatedAt = time.Now()
 	job.UpdatedAt = time.Now()
-	job.Status = JobStatusPending
 
 	q.jobs[job.ID] = job
 	q.queue = append(q.queue, job)
@@ -52,7 +51,6 @@ func (q *InMemoryJobQueue) Dequeue(ctx context.Context) (*Job, error) {
 	job := q.queue[0]
 	q.queue = q.queue[1:]
 
-	job.Status = JobStatusAssigned
 	job.CreatedAt = time.Now()
 	job.UpdatedAt = time.Now()
 
@@ -92,21 +90,6 @@ func (q *InMemoryJobQueue) GetJob(ctx context.Context, jobID uuid.UUID) (*Job, e
 	}
 
 	return job, nil
-}
-
-func (q *InMemoryJobQueue) UpdateStatus(ctx context.Context, jobID uuid.UUID, status JobStatus) error {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-
-	job, exists := q.jobs[jobID]
-	if !exists {
-		return ErrJobNotFound
-	}
-
-	job.Status = status
-	job.UpdatedAt = time.Now()
-
-	return nil
 }
 
 func (q *InMemoryJobQueue) GetQueueDepth(ctx context.Context) (int, error) {

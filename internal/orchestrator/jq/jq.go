@@ -8,19 +8,8 @@ import (
 	"github.com/svaan1/tcc-go/internal/ffmpeg"
 )
 
-type JobStatus int
-
-const (
-	JobStatusPending JobStatus = iota
-	JobStatusAssigned
-	JobStatusRunning
-	JobStatusCompleted
-	JobStatusFailed
-)
-
 type Job struct {
 	ID        uuid.UUID              `json:"id"`
-	Status    JobStatus              `json:"status"`
 	Params    *ffmpeg.EncodingParams `json:"params"`
 	CreatedAt time.Time              `json:"created_at"`
 	UpdatedAt time.Time              `json:"updated_at"`
@@ -33,6 +22,5 @@ type JobQueue interface {
 
 	ListJobs(ctx context.Context) ([]*Job, error)
 	GetJob(ctx context.Context, jobID uuid.UUID) (*Job, error)
-	UpdateStatus(ctx context.Context, jobID uuid.UUID, status JobStatus) error
 	GetQueueDepth(ctx context.Context) (int, error)
 }

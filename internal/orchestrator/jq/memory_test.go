@@ -3,7 +3,6 @@ package jq
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/svaan1/tcc-go/internal/ffmpeg"
@@ -21,10 +20,6 @@ func TestInMemoryJobQueue_Enqueue(t *testing.T) {
 	err := queue.Enqueue(ctx, job)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
-	}
-
-	if job.Status != JobStatusPending {
-		t.Errorf("expected status %v, got %v", JobStatusPending, job.Status)
 	}
 
 	if job.CreatedAt.IsZero() {
@@ -69,10 +64,6 @@ func TestInMemoryJobQueue_Dequeue(t *testing.T) {
 
 	if dequeuedJob.ID != job.ID {
 		t.Errorf("expected job ID %v, got %v", job.ID, dequeuedJob.ID)
-	}
-
-	if dequeuedJob.Status != JobStatusAssigned {
-		t.Errorf("expected status %v, got %v", JobStatusAssigned, dequeuedJob.Status)
 	}
 
 	depth, err := queue.GetQueueDepth(ctx)
@@ -148,45 +139,6 @@ func TestInMemoryJobQueue_GetJob(t *testing.T) {
 
 	if retrievedJob.ID != jobID {
 		t.Errorf("expected job ID %v, got %v", jobID, retrievedJob.ID)
-	}
-}
-
-func TestInMemoryJobQueue_UpdateStatus(t *testing.T) {
-	queue := NewInMemoryJobQueue()
-	ctx := context.Background()
-
-	jobID := uuid.New()
-
-	// Test non-existent job
-	err := queue.UpdateStatus(ctx, jobID, JobStatusRunning)
-	if err != ErrJobNotFound {
-		t.Errorf("expected ErrJobNotFound, got %v", err)
-	}
-
-	// Add job and update status
-	job := &Job{
-		ID:     jobID,
-		Params: &ffmpeg.EncodingParams{},
-	}
-
-	queue.Enqueue(ctx, job)
-	originalUpdatedAt := job.UpdatedAt
-
-	// Wait a bit to ensure timestamp difference
-	time.Sleep(time.Millisecond)
-
-	err = queue.UpdateStatus(ctx, jobID, JobStatusRunning)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-
-	updatedJob, _ := queue.GetJob(ctx, jobID)
-	if updatedJob.Status != JobStatusRunning {
-		t.Errorf("expected status %v, got %v", JobStatusRunning, updatedJob.Status)
-	}
-
-	if !updatedJob.UpdatedAt.After(originalUpdatedAt) {
-		t.Error("expected UpdatedAt to be updated")
 	}
 }
 
