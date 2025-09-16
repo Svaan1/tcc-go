@@ -1,4 +1,4 @@
-package scheduler
+package js
 
 import (
 	"context"
@@ -13,6 +13,10 @@ type RoundRobinScheduler struct {
 	nextIdx int
 
 	mu sync.Mutex
+}
+
+func NewRoundRobinScheduler() *RoundRobinScheduler {
+	return &RoundRobinScheduler{}
 }
 
 func (rr *RoundRobinScheduler) RankNodes(ctx context.Context, job *jq.Job, nodes []*np.Node) ([]*np.Node, error) {
