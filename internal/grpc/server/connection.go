@@ -50,3 +50,16 @@ func (n *NodeConn) SendJobAssignmentRequest(req *pb.JobAssignmentRequest) error 
 	}
 	return n.stream.Send(msg)
 }
+
+func (n *NodeConn) SendDisconnectResponse(req *pb.DisconnectResponse) error {
+	msg := &pb.OrchestratorMessage{
+		Base: &pb.MessageBase{
+			MessageId: "disconnect-response-" + n.ID.String(),
+			Timestamp: timestamppb.Now(),
+		},
+		Payload: &pb.OrchestratorMessage_DisconnectResponse{
+			DisconnectResponse: req,
+		},
+	}
+	return n.stream.Send(msg)
+}

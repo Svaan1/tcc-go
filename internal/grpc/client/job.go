@@ -6,7 +6,6 @@ import (
 
 	"github.com/svaan1/tcc-go/internal/ffmpeg"
 	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (c *Client) handleJobAssignment(ctx context.Context, jobRequest *pb.JobAssignmentRequest) {
@@ -16,27 +15,6 @@ func (c *Client) handleJobAssignment(ctx context.Context, jobRequest *pb.JobAssi
 
 	// For now, just accept all jobs
 	// In a real implementation, you would check if the node can handle the job
-	accepted := true
-	message := "Job accepted"
-
-	response := &pb.NodeMessage{
-		Base: &pb.MessageBase{
-			MessageId: "job-response-" + jobRequest.JobId,
-			Timestamp: timestamppb.Now(),
-		},
-		Payload: &pb.NodeMessage_JobAssignmentResponse{
-			JobAssignmentResponse: &pb.JobAssignmentResponse{
-				JobId:    jobRequest.JobId,
-				Accepted: accepted,
-				Message:  message,
-			},
-		},
-	}
-
-	if err := c.stream.Send(response); err != nil {
-		log.Printf("Failed to send job response: %v", err)
-	}
-
 	err := ffmpeg.Encode(&ffmpeg.EncodingParams{
 		InputPath:  jobRequest.InputPath,
 		OutputPath: jobRequest.OutputPath,

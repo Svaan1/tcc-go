@@ -65,8 +65,8 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 				return err
 			}
 
-			log.Printf("Received message from node %s - Message ID: %s, Timestamp: %v",
-				node.Name, msg.Base.MessageId, msg.Base.Timestamp.AsTime())
+			// log.Printf("Received message from node %s - Message ID: %s, Timestamp: %v",
+			// 	node.Name, msg.Base.MessageId, msg.Base.Timestamp.AsTime())
 
 			// ts := msg.Base.Timestamp.AsTime()
 
@@ -80,16 +80,14 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 						DiskUsagePercent:   payload.ResourceUsageRequest.DiskPercent,
 					},
 				)
-			case *pb.NodeMessage_JobAssignmentResponse:
-				log.Printf("Job assignment response: job_id=%s, accepted=%t, message=%s",
-					payload.JobAssignmentResponse.JobId,
-					payload.JobAssignmentResponse.Accepted,
-					payload.JobAssignmentResponse.Message)
 			case *pb.NodeMessage_DisconnectRequest:
-				log.Printf("Disconnect request: reason=%s",
-					payload.DisconnectRequest.Reason)
-			default:
-				log.Printf("Unknown message type received")
+				nodeConn.SendDisconnectResponse(&pb.DisconnectResponse{
+					Acknowledged: true,
+				})
+
+				sv.mu.Lock()
+				close(nodeConn.closedChan)
+				sv.mu.Unlock()
 			}
 		}
 	}

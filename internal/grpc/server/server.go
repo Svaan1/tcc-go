@@ -9,12 +9,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/svaan1/tcc-go/internal/ffmpeg"
 	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
 	"github.com/svaan1/tcc-go/internal/orchestrator"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ServerConfig struct {
@@ -57,6 +55,7 @@ func (sv *Server) Serve() error {
 
 	reflection.Register(server)
 
+	go sv.pollJobs()
 	go sv.trackTimedOutNodes()
 
 	log.Println("Starting gRPC server...")
@@ -67,61 +66,39 @@ func (sv *Server) Serve() error {
 	return nil
 }
 
-// GetAllNodes returns all registered nodes with their current resource usage
-func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (*pb.GetAllNodesResponse, error) {
-	nodes, err := sv.Service.ListNodes(context.TODO())
+func (sv *Server) pollJobs() {
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
 
-	if err != nil {
-		return nil, err
-	}
-
-	nodeInfos := make([]*pb.NodeInfo, len(nodes))
-	for i, node := range nodes {
-		nodeInfos[i] = &pb.NodeInfo{
-			NodeId:        node.ID.String(),
-			Name:          node.Name,
-			Codecs:        make([]string, 0), // TODO
-			CpuPercent:    node.ResourceUsage.CPUUsagePercent,
-			MemoryPercent: node.ResourceUsage.MemoryUsagePercent,
-			DiskPercent:   node.ResourceUsage.DiskUsagePercent,
-			LastSeen:      timestamppb.New(node.HeartBeat),
+	for range ticker.C {
+		job, node, err := sv.Service.DequeueJob(context.TODO())
+		if err != nil {
+			continue
 		}
+
+		if job == nil || node == nil {
+			continue
+		}
+
+		sv.mu.Lock()
+
+		conn, exists := sv.NodeConns[node.ID]
+		if !exists {
+			sv.mu.Unlock()
+			continue
+		}
+
+		conn.SendJobAssignmentRequest(&pb.JobAssignmentRequest{
+			InputPath:  job.Params.InputPath,
+			OutputPath: job.Params.OutputPath,
+			VideoCodec: job.Params.VideoCodec,
+			AudioCodec: job.Params.AudioCodec,
+			Crf:        job.Params.Crf,
+			Preset:     job.Params.Preset,
+		})
+
+		sv.mu.Unlock()
 	}
-
-	return &pb.GetAllNodesResponse{
-		Nodes:      nodeInfos,
-		TotalCount: int32(len(nodes)),
-	}, nil
-}
-
-// EnqueueJob enqueues a new transcoding job to be assigned to an available node
-func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*pb.EnqueueJobResponse, error) {
-	jobID := uuid.New().String()
-
-	err := sv.Service.EnqueueJob(ctx, &ffmpeg.EncodingParams{
-		InputPath:  req.InputPath,
-		OutputPath: req.OutputPath,
-		VideoCodec: req.VideoCodec,
-		AudioCodec: req.AudioCodec,
-		Crf:        req.Crf,
-		Preset:     req.Preset,
-	})
-
-	if err != nil {
-		return &pb.EnqueueJobResponse{
-			JobId:   jobID,
-			Success: false,
-			Message: fmt.Sprintf("Failed to enqueue job: %v", err),
-		}, nil
-	}
-
-	log.Printf("Job %s enqueued", jobID)
-
-	return &pb.EnqueueJobResponse{
-		JobId:   jobID,
-		Success: true,
-		Message: "Job successfully enqueued",
-	}, nil
 }
 
 func (sv *Server) trackTimedOutNodes() {

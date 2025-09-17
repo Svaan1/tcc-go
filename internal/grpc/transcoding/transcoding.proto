@@ -26,7 +26,6 @@ message NodeMessage {
   oneof payload {
     RegisterRequest register_request = 2;
     ResourceUsageRequest resource_usage_request = 3;
-    JobAssignmentResponse job_assignment_response = 4;
     DisconnectRequest disconnect_request = 5;
   }
 }
@@ -37,7 +36,6 @@ message OrchestratorMessage {
   
   oneof payload {
     RegisterResponse register_response = 2;
-    ResourceUsageResponse resource_usage_response = 3;
     JobAssignmentRequest job_assignment_request = 4;
     DisconnectResponse disconnect_response = 7;
   }

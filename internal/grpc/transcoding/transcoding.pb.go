@@ -7,13 +7,12 @@
 package transcoding
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -83,7 +82,6 @@ type NodeMessage struct {
 	//
 	//	*NodeMessage_RegisterRequest
 	//	*NodeMessage_ResourceUsageRequest
-	//	*NodeMessage_JobAssignmentResponse
 	//	*NodeMessage_DisconnectRequest
 	Payload       isNodeMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
@@ -152,15 +150,6 @@ func (x *NodeMessage) GetResourceUsageRequest() *ResourceUsageRequest {
 	return nil
 }
 
-func (x *NodeMessage) GetJobAssignmentResponse() *JobAssignmentResponse {
-	if x != nil {
-		if x, ok := x.Payload.(*NodeMessage_JobAssignmentResponse); ok {
-			return x.JobAssignmentResponse
-		}
-	}
-	return nil
-}
-
 func (x *NodeMessage) GetDisconnectRequest() *DisconnectRequest {
 	if x != nil {
 		if x, ok := x.Payload.(*NodeMessage_DisconnectRequest); ok {
@@ -182,10 +171,6 @@ type NodeMessage_ResourceUsageRequest struct {
 	ResourceUsageRequest *ResourceUsageRequest `protobuf:"bytes,3,opt,name=resource_usage_request,json=resourceUsageRequest,proto3,oneof"`
 }
 
-type NodeMessage_JobAssignmentResponse struct {
-	JobAssignmentResponse *JobAssignmentResponse `protobuf:"bytes,4,opt,name=job_assignment_response,json=jobAssignmentResponse,proto3,oneof"`
-}
-
 type NodeMessage_DisconnectRequest struct {
 	DisconnectRequest *DisconnectRequest `protobuf:"bytes,5,opt,name=disconnect_request,json=disconnectRequest,proto3,oneof"`
 }
@@ -193,8 +178,6 @@ type NodeMessage_DisconnectRequest struct {
 func (*NodeMessage_RegisterRequest) isNodeMessage_Payload() {}
 
 func (*NodeMessage_ResourceUsageRequest) isNodeMessage_Payload() {}
-
-func (*NodeMessage_JobAssignmentResponse) isNodeMessage_Payload() {}
 
 func (*NodeMessage_DisconnectRequest) isNodeMessage_Payload() {}
 
@@ -205,7 +188,6 @@ type OrchestratorMessage struct {
 	// Types that are valid to be assigned to Payload:
 	//
 	//	*OrchestratorMessage_RegisterResponse
-	//	*OrchestratorMessage_ResourceUsageResponse
 	//	*OrchestratorMessage_JobAssignmentRequest
 	//	*OrchestratorMessage_DisconnectResponse
 	Payload       isOrchestratorMessage_Payload `protobuf_oneof:"payload"`
@@ -266,15 +248,6 @@ func (x *OrchestratorMessage) GetRegisterResponse() *RegisterResponse {
 	return nil
 }
 
-func (x *OrchestratorMessage) GetResourceUsageResponse() *ResourceUsageResponse {
-	if x != nil {
-		if x, ok := x.Payload.(*OrchestratorMessage_ResourceUsageResponse); ok {
-			return x.ResourceUsageResponse
-		}
-	}
-	return nil
-}
-
 func (x *OrchestratorMessage) GetJobAssignmentRequest() *JobAssignmentRequest {
 	if x != nil {
 		if x, ok := x.Payload.(*OrchestratorMessage_JobAssignmentRequest); ok {
@@ -301,10 +274,6 @@ type OrchestratorMessage_RegisterResponse struct {
 	RegisterResponse *RegisterResponse `protobuf:"bytes,2,opt,name=register_response,json=registerResponse,proto3,oneof"`
 }
 
-type OrchestratorMessage_ResourceUsageResponse struct {
-	ResourceUsageResponse *ResourceUsageResponse `protobuf:"bytes,3,opt,name=resource_usage_response,json=resourceUsageResponse,proto3,oneof"`
-}
-
 type OrchestratorMessage_JobAssignmentRequest struct {
 	JobAssignmentRequest *JobAssignmentRequest `protobuf:"bytes,4,opt,name=job_assignment_request,json=jobAssignmentRequest,proto3,oneof"`
 }
@@ -314,8 +283,6 @@ type OrchestratorMessage_DisconnectResponse struct {
 }
 
 func (*OrchestratorMessage_RegisterResponse) isOrchestratorMessage_Payload() {}
-
-func (*OrchestratorMessage_ResourceUsageResponse) isOrchestratorMessage_Payload() {}
 
 func (*OrchestratorMessage_JobAssignmentRequest) isOrchestratorMessage_Payload() {}
 
@@ -1133,18 +1100,16 @@ const file_internal_grpc_transcoding_transcoding_proto_rawDesc = "" +
 	"\vMessageBase\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x128\n" +
-	"\ttimestamp\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"\x9b\x03\n" +
+	"\ttimestamp\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"\xbd\x02\n" +
 	"\vNodeMessage\x12,\n" +
 	"\x04base\x18\x01 \x01(\v2\x18.transcoding.MessageBaseR\x04base\x12I\n" +
 	"\x10register_request\x18\x02 \x01(\v2\x1c.transcoding.RegisterRequestH\x00R\x0fregisterRequest\x12Y\n" +
-	"\x16resource_usage_request\x18\x03 \x01(\v2!.transcoding.ResourceUsageRequestH\x00R\x14resourceUsageRequest\x12\\\n" +
-	"\x17job_assignment_response\x18\x04 \x01(\v2\".transcoding.JobAssignmentResponseH\x00R\x15jobAssignmentResponse\x12O\n" +
+	"\x16resource_usage_request\x18\x03 \x01(\v2!.transcoding.ResourceUsageRequestH\x00R\x14resourceUsageRequest\x12O\n" +
 	"\x12disconnect_request\x18\x05 \x01(\v2\x1e.transcoding.DisconnectRequestH\x00R\x11disconnectRequestB\t\n" +
-	"\apayload\"\xa9\x03\n" +
+	"\apayload\"\xcb\x02\n" +
 	"\x13OrchestratorMessage\x12,\n" +
 	"\x04base\x18\x01 \x01(\v2\x18.transcoding.MessageBaseR\x04base\x12L\n" +
-	"\x11register_response\x18\x02 \x01(\v2\x1d.transcoding.RegisterResponseH\x00R\x10registerResponse\x12\\\n" +
-	"\x17resource_usage_response\x18\x03 \x01(\v2\".transcoding.ResourceUsageResponseH\x00R\x15resourceUsageResponse\x12Y\n" +
+	"\x11register_response\x18\x02 \x01(\v2\x1d.transcoding.RegisterResponseH\x00R\x10registerResponse\x12Y\n" +
 	"\x16job_assignment_request\x18\x04 \x01(\v2!.transcoding.JobAssignmentRequestH\x00R\x14jobAssignmentRequest\x12R\n" +
 	"\x13disconnect_response\x18\a \x01(\v2\x1f.transcoding.DisconnectResponseH\x00R\x12disconnectResponseB\t\n" +
 	"\apayload\"=\n" +
@@ -1257,26 +1222,24 @@ var file_internal_grpc_transcoding_transcoding_proto_depIdxs = []int32{
 	0,  // 1: transcoding.NodeMessage.base:type_name -> transcoding.MessageBase
 	3,  // 2: transcoding.NodeMessage.register_request:type_name -> transcoding.RegisterRequest
 	5,  // 3: transcoding.NodeMessage.resource_usage_request:type_name -> transcoding.ResourceUsageRequest
-	8,  // 4: transcoding.NodeMessage.job_assignment_response:type_name -> transcoding.JobAssignmentResponse
-	9,  // 5: transcoding.NodeMessage.disconnect_request:type_name -> transcoding.DisconnectRequest
-	0,  // 6: transcoding.OrchestratorMessage.base:type_name -> transcoding.MessageBase
-	4,  // 7: transcoding.OrchestratorMessage.register_response:type_name -> transcoding.RegisterResponse
-	6,  // 8: transcoding.OrchestratorMessage.resource_usage_response:type_name -> transcoding.ResourceUsageResponse
-	7,  // 9: transcoding.OrchestratorMessage.job_assignment_request:type_name -> transcoding.JobAssignmentRequest
-	10, // 10: transcoding.OrchestratorMessage.disconnect_response:type_name -> transcoding.DisconnectResponse
-	16, // 11: transcoding.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
-	12, // 12: transcoding.GetAllNodesResponse.nodes:type_name -> transcoding.NodeInfo
-	1,  // 13: transcoding.VideoTranscoding.Stream:input_type -> transcoding.NodeMessage
-	11, // 14: transcoding.VideoTranscoding.GetAllNodes:input_type -> transcoding.GetAllNodesRequest
-	14, // 15: transcoding.VideoTranscoding.EnqueueJob:input_type -> transcoding.EnqueueJobRequest
-	2,  // 16: transcoding.VideoTranscoding.Stream:output_type -> transcoding.OrchestratorMessage
-	13, // 17: transcoding.VideoTranscoding.GetAllNodes:output_type -> transcoding.GetAllNodesResponse
-	15, // 18: transcoding.VideoTranscoding.EnqueueJob:output_type -> transcoding.EnqueueJobResponse
-	16, // [16:19] is the sub-list for method output_type
-	13, // [13:16] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	9,  // 4: transcoding.NodeMessage.disconnect_request:type_name -> transcoding.DisconnectRequest
+	0,  // 5: transcoding.OrchestratorMessage.base:type_name -> transcoding.MessageBase
+	4,  // 6: transcoding.OrchestratorMessage.register_response:type_name -> transcoding.RegisterResponse
+	7,  // 7: transcoding.OrchestratorMessage.job_assignment_request:type_name -> transcoding.JobAssignmentRequest
+	10, // 8: transcoding.OrchestratorMessage.disconnect_response:type_name -> transcoding.DisconnectResponse
+	16, // 9: transcoding.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
+	12, // 10: transcoding.GetAllNodesResponse.nodes:type_name -> transcoding.NodeInfo
+	1,  // 11: transcoding.VideoTranscoding.Stream:input_type -> transcoding.NodeMessage
+	11, // 12: transcoding.VideoTranscoding.GetAllNodes:input_type -> transcoding.GetAllNodesRequest
+	14, // 13: transcoding.VideoTranscoding.EnqueueJob:input_type -> transcoding.EnqueueJobRequest
+	2,  // 14: transcoding.VideoTranscoding.Stream:output_type -> transcoding.OrchestratorMessage
+	13, // 15: transcoding.VideoTranscoding.GetAllNodes:output_type -> transcoding.GetAllNodesResponse
+	15, // 16: transcoding.VideoTranscoding.EnqueueJob:output_type -> transcoding.EnqueueJobResponse
+	14, // [14:17] is the sub-list for method output_type
+	11, // [11:14] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_internal_grpc_transcoding_transcoding_proto_init() }
@@ -1287,12 +1250,10 @@ func file_internal_grpc_transcoding_transcoding_proto_init() {
 	file_internal_grpc_transcoding_transcoding_proto_msgTypes[1].OneofWrappers = []any{
 		(*NodeMessage_RegisterRequest)(nil),
 		(*NodeMessage_ResourceUsageRequest)(nil),
-		(*NodeMessage_JobAssignmentResponse)(nil),
 		(*NodeMessage_DisconnectRequest)(nil),
 	}
 	file_internal_grpc_transcoding_transcoding_proto_msgTypes[2].OneofWrappers = []any{
 		(*OrchestratorMessage_RegisterResponse)(nil),
-		(*OrchestratorMessage_ResourceUsageResponse)(nil),
 		(*OrchestratorMessage_JobAssignmentRequest)(nil),
 		(*OrchestratorMessage_DisconnectResponse)(nil),
 	}

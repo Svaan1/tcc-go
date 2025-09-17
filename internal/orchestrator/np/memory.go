@@ -31,9 +31,14 @@ func (p *InMemoryNodePool) RegisterNode(ctx context.Context, req *NodeRegistrati
 	defer p.mu.Unlock()
 
 	node := &Node{
-		ID:        uuid.New(),
-		Name:      req.Name,
-		Profiles:  req.Profiles,
+		ID:       uuid.New(),
+		Name:     req.Name,
+		Profiles: req.Profiles,
+		ResourceUsage: &metrics.ResourceUsage{
+			CPUUsagePercent:    0,
+			MemoryUsagePercent: 0,
+			DiskUsagePercent:   0,
+		},
 		HeartBeat: time.Now(),
 	}
 
@@ -62,7 +67,10 @@ func (p *InMemoryNodePool) UpdateNodeMetrics(ctx context.Context, nodeID uuid.UU
 		return fmt.Errorf("node not found")
 	}
 
-	node.ResourceUsage = usage
+	node.ResourceUsage.CPUUsagePercent = usage.CPUUsagePercent
+	node.ResourceUsage.MemoryUsagePercent = usage.MemoryUsagePercent
+	node.ResourceUsage.DiskUsagePercent = usage.DiskUsagePercent
+
 	node.HeartBeat = time.Now()
 	return nil
 }

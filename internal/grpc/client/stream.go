@@ -35,11 +35,6 @@ func (c *Client) handleStream(ctx context.Context) {
 					payload.RegisterResponse.Success,
 					payload.RegisterResponse.Message)
 
-			case *pb.OrchestratorMessage_ResourceUsageResponse:
-				log.Printf("Resource usage response: success=%t, message=%s",
-					payload.ResourceUsageResponse.Success,
-					payload.ResourceUsageResponse.Message)
-
 			case *pb.OrchestratorMessage_JobAssignmentRequest:
 				c.handleJobAssignment(ctx, payload.JobAssignmentRequest)
 
