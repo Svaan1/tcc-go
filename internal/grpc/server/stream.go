@@ -6,69 +6,39 @@ import (
 	"io"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/svaan1/tcc-go/internal/ffmpeg"
-	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
+	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
 	"github.com/svaan1/tcc-go/internal/metrics"
 )
 
 func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	log.Printf("New connection established")
 
-	msg, err := stream.Recv()
+	nodeID, nodeConn, err := sv.registerNode(stream)
 	if err != nil {
-		return fmt.Errorf("error receiving initial message: %v", err)
+		log.Printf("Failed to register node: %v", err)
+		return err
 	}
 
-	register := msg.GetRegisterRequest()
-	if register == nil {
-		return fmt.Errorf("expected RegisterRequest but got different message type")
-	}
+	defer sv.unregisterNode(nodeID)
 
-	node, err := sv.Service.RegisterNode(context.TODO(), register.Name, make([]ffmpeg.EncodingProfile, 0))
-	if err != nil {
-		return fmt.Errorf("failed to register node: %v", err)
-	}
-
-	nodeConn := newNodeConn(node.ID, stream)
-
-	sv.mu.Lock()
-	sv.NodeConns[node.ID] = nodeConn
-	sv.mu.Unlock()
-
-	if err := nodeConn.SendRegisterResponse(); err != nil {
-		return fmt.Errorf("error sending registration response to %s: %v", node.Name, err)
-	}
-
-	defer func() {
-		sv.mu.Lock()
-		sv.Service.UnregisterNode(context.TODO(), node.ID)
-		delete(sv.NodeConns, node.ID)
-		sv.mu.Unlock()
-
-		log.Printf("Node %s (%s) disconnected", node.Name, node.ID.String())
-	}()
-
-	log.Printf("Starting message processing loop for node %s", node.Name)
+	log.Printf("Starting message processing loop for node %s", nodeID)
 	for {
 		select {
 		case <-nodeConn.closedChan:
-			log.Printf("Node %s stream closing due to closed channel", node.Name)
+			log.Printf("Node %s stream closing due to closed channel", nodeID)
 			return nil
 		default:
 			msg, err := stream.Recv()
 			if err == io.EOF {
-				log.Printf("Stream closed by node %s", node.Name)
+				log.Printf("Stream closed by node %s", nodeID)
 				return nil
 			}
 			if err != nil {
-				log.Printf("Error receiving message from node %s: %v", node.Name, err)
+				log.Printf("Error receiving message from node %s: %v", nodeID, err)
 				return err
 			}
-
-			// log.Printf("Received message from node %s - Message ID: %s, Timestamp: %v",
-			// 	node.Name, msg.Base.MessageId, msg.Base.Timestamp.AsTime())
-
-			// ts := msg.Base.Timestamp.AsTime()
 
 			switch payload := msg.Payload.(type) {
 			case *pb.NodeMessage_ResourceUsageRequest:
@@ -81,14 +51,61 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 					},
 				)
 			case *pb.NodeMessage_DisconnectRequest:
-				nodeConn.SendDisconnectResponse(&pb.DisconnectResponse{
-					Acknowledged: true,
-				})
-
-				sv.mu.Lock()
-				close(nodeConn.closedChan)
-				sv.mu.Unlock()
+				nodeConn.SendDisconnectResponse(&pb.DisconnectResponse{Acknowledged: true})
+				return nil
 			}
 		}
 	}
+}
+
+func (sv *Server) registerNode(stream pb.VideoTranscoding_StreamServer) (nodeID uuid.UUID, nodeConn *NodeConn, err error) {
+	msg, err := stream.Recv()
+	if err != nil {
+		return uuid.Nil, nil, fmt.Errorf("error receiving initial message: %v", err)
+	}
+
+	register := msg.GetRegisterRequest()
+	if register == nil {
+		return uuid.Nil, nil, fmt.Errorf("expected RegisterRequest but got different message type")
+	}
+
+	// Parse the encoding profile structs
+	var profiles []ffmpeg.EncodingProfile
+	for _, profile := range register.EncodingProfiles {
+		profiles = append(profiles, ffmpeg.EncodingProfile{
+			Name:       profile.GetName(),
+			Codec:      profile.GetCodec(),
+			Params:     profile.GetParams(),
+			EncodeTime: profile.GetEncodeTime(),
+			DecodeTime: profile.GetDecodeTime(),
+			FPS:        profile.GetFps(),
+			Score:      profile.GetScore(),
+		})
+	}
+
+	nodeID, err = sv.Service.RegisterNode(context.TODO(), register.Name, profiles)
+	if err != nil {
+		return uuid.Nil, nil, fmt.Errorf("failed to register node: %v", err)
+	}
+
+	nodeConn = newNodeConn(nodeID, stream)
+
+	sv.mu.Lock()
+	sv.NodeConns[nodeID] = nodeConn
+	sv.mu.Unlock()
+
+	if err := nodeConn.SendRegisterResponse(); err != nil {
+		return uuid.Nil, nil, fmt.Errorf("error sending registration response to %s: %v", nodeID, err)
+	}
+
+	return nodeID, nodeConn, nil
+}
+
+func (sv *Server) unregisterNode(nodeID uuid.UUID) {
+	sv.mu.Lock()
+	sv.Service.UnregisterNode(context.TODO(), nodeID)
+	delete(sv.NodeConns, nodeID)
+	sv.mu.Unlock()
+
+	log.Printf("Node %s disconnected", nodeID.String())
 }

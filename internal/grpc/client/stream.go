@@ -5,7 +5,7 @@ import (
 	"io"
 	"log"
 
-	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
+	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
 )
 
 func (c *Client) handleStream(ctx context.Context) {

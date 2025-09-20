@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/google/uuid"
-	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
+	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

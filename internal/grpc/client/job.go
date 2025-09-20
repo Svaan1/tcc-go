@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/svaan1/tcc-go/internal/ffmpeg"
-	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
+	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
 )
 
 func (c *Client) handleJobAssignment(ctx context.Context, jobRequest *pb.JobAssignmentRequest) {

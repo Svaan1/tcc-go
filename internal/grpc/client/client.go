@@ -5,7 +5,8 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
+	"github.com/svaan1/tcc-go/internal/ffmpeg"
+	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -40,7 +41,7 @@ func New(address string) *Client {
 	}
 }
 
-func (c *Client) Connect(ctx context.Context, name string, codecs []string) error {
+func (c *Client) Connect(ctx context.Context, name string, profiles []ffmpeg.EncodingProfile) error {
 	conn, err := grpc.NewClient(c.Config.Address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
@@ -54,7 +55,7 @@ func (c *Client) Connect(ctx context.Context, name string, codecs []string) erro
 		return err
 	}
 
-	if err := c.register(stream, name, codecs); err != nil {
+	if err := c.register(stream, name, profiles); err != nil {
 		log.Printf("Failed to register %v", err)
 		return err
 	}
@@ -96,7 +97,21 @@ func (c *Client) Close() error {
 	return nil
 }
 
-func (c *Client) register(stream grpc.BidiStreamingClient[pb.NodeMessage, pb.OrchestratorMessage], name string, codecs []string) error {
+func (c *Client) register(stream grpc.BidiStreamingClient[pb.NodeMessage, pb.OrchestratorMessage], name string, profiles []ffmpeg.EncodingProfile) error {
+	var encodingProfiles []*pb.EncodingProfile
+
+	for _, profile := range profiles {
+		encodingProfiles = append(encodingProfiles, &pb.EncodingProfile{
+			Name:       profile.Name,
+			Codec:      profile.Codec,
+			Params:     profile.Params,
+			EncodeTime: profile.EncodeTime,
+			DecodeTime: profile.DecodeTime,
+			Fps:        profile.FPS,
+			Score:      profile.Score,
+		})
+	}
+
 	registerMsg := &pb.NodeMessage{
 		Base: &pb.MessageBase{
 			MessageId: "register-" + name,
@@ -104,8 +119,8 @@ func (c *Client) register(stream grpc.BidiStreamingClient[pb.NodeMessage, pb.Orc
 		},
 		Payload: &pb.NodeMessage_RegisterRequest{
 			RegisterRequest: &pb.RegisterRequest{
-				Name:   name,
-				Codecs: codecs,
+				Name:             name,
+				EncodingProfiles: encodingProfiles,
 			},
 		},
 	}

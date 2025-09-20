@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	pb "github.com/svaan1/tcc-go/internal/grpc/transcoding"
+	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
 	"github.com/svaan1/tcc-go/internal/orchestrator"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
