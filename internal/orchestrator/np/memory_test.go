@@ -32,19 +32,13 @@ func TestRegisterNode(t *testing.T) {
 			},
 		}
 
-		node, err := pool.RegisterNode(ctx, req)
+		nodeID, err := pool.RegisterNode(ctx, req)
 		if err != nil {
 			t.Fatalf("RegisterNode() failed: %v", err)
 		}
 
-		if node.ID == uuid.Nil {
+		if nodeID == uuid.Nil {
 			t.Error("node ID should not be nil")
-		}
-		if node.Name != req.Name {
-			t.Errorf("expected name %s, got %s", req.Name, node.Name)
-		}
-		if len(node.Profiles) != len(req.Profiles) {
-			t.Errorf("expected %d codecs, got %d", len(req.Profiles), len(node.Profiles))
 		}
 	})
 
@@ -70,16 +64,16 @@ func TestUnregisterNode(t *testing.T) {
 
 	// Register a node first
 	req := &NodeRegistration{Name: "test-node"}
-	node, _ := pool.RegisterNode(ctx, req)
+	nodeID, _ := pool.RegisterNode(ctx, req)
 
 	t.Run("valid unregistration", func(t *testing.T) {
-		err := pool.UnregisterNode(ctx, node.ID)
+		err := pool.UnregisterNode(ctx, nodeID)
 		if err != nil {
 			t.Fatalf("UnregisterNode() failed: %v", err)
 		}
 
 		// Verify node is removed
-		_, err = pool.GetNode(ctx, node.ID)
+		_, err = pool.GetNode(ctx, nodeID)
 		if err == nil {
 			t.Error("expected error when getting removed node")
 		}
@@ -98,7 +92,7 @@ func TestUpdateNodeMetrics(t *testing.T) {
 	ctx := context.Background()
 
 	req := &NodeRegistration{Name: "test-node"}
-	node, _ := pool.RegisterNode(ctx, req)
+	nodeID, _ := pool.RegisterNode(ctx, req)
 
 	t.Run("valid update", func(t *testing.T) {
 		usage := &metrics.ResourceUsage{
@@ -107,13 +101,13 @@ func TestUpdateNodeMetrics(t *testing.T) {
 			DiskUsagePercent:   20.0,
 		}
 
-		err := pool.UpdateNodeMetrics(ctx, node.ID, usage)
+		err := pool.UpdateNodeMetrics(ctx, nodeID, usage)
 		if err != nil {
 			t.Fatalf("UpdateNodeMetrics() failed: %v", err)
 		}
 
 		// Verify update
-		updatedNode, _ := pool.GetNode(ctx, node.ID)
+		updatedNode, _ := pool.GetNode(ctx, nodeID)
 		if updatedNode.ResourceUsage == nil {
 			t.Error("resource usage should not be nil")
 		}
@@ -136,14 +130,14 @@ func TestGetNode(t *testing.T) {
 	ctx := context.Background()
 
 	req := &NodeRegistration{Name: "test-node"}
-	registeredNode, _ := pool.RegisterNode(ctx, req)
+	registeredNodeID, _ := pool.RegisterNode(ctx, req)
 
 	t.Run("existing node", func(t *testing.T) {
-		node, err := pool.GetNode(ctx, registeredNode.ID)
+		node, err := pool.GetNode(ctx, registeredNodeID)
 		if err != nil {
 			t.Fatalf("GetNode() failed: %v", err)
 		}
-		if node.ID != registeredNode.ID {
+		if node.ID != registeredNodeID {
 			t.Error("returned node ID doesn't match")
 		}
 	})
@@ -292,12 +286,12 @@ func TestConcurrentAccess(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		go func(id int) {
 			req := &NodeRegistration{Name: "concurrent-node-" + string(rune('0'+id))}
-			node, err := pool.RegisterNode(ctx, req)
+			nodeID, err := pool.RegisterNode(ctx, req)
 			if err != nil {
 				t.Errorf("concurrent RegisterNode() failed: %v", err)
 			} else {
 				// Immediately unregister
-				pool.UnregisterNode(ctx, node.ID)
+				pool.UnregisterNode(ctx, nodeID)
 			}
 			done <- true
 		}(i)

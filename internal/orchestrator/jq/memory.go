@@ -27,17 +27,21 @@ func NewInMemoryJobQueue() *InMemoryJobQueue {
 	}
 }
 
-func (q *InMemoryJobQueue) Enqueue(ctx context.Context, job *Job) error {
+func (q *InMemoryJobQueue) Enqueue(ctx context.Context, params JobParams) (uuid.UUID, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	job.CreatedAt = time.Now()
-	job.UpdatedAt = time.Now()
+	job := &Job{
+		ID:        uuid.New(),
+		Params:    params,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
 	q.jobs[job.ID] = job
 	q.queue = append(q.queue, job)
 
-	return nil
+	return job.ID, nil
 }
 
 func (q *InMemoryJobQueue) Dequeue(ctx context.Context) (*Job, error) {

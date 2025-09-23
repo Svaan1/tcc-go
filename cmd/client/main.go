@@ -6,22 +6,35 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
 	"github.com/svaan1/tcc-go/internal/config"
+	"github.com/svaan1/tcc-go/internal/ffmpeg"
 	"github.com/svaan1/tcc-go/internal/grpc/client"
 )
 
 func main() {
-	codecs := strings.Split(config.ClientCodecs, ";")
-
 	address := net.JoinHostPort(config.ServerHostName, config.ServerPortGRPC)
+
+	profiles := []ffmpeg.EncodingProfile{
+		{
+			Name:  "264-slow",
+			Codec: "libx264",
+			Params: []string{
+				"-preset", "slow",
+				"-crf", "23",
+			},
+
+			EncodeTime: 1,
+			DecodeTime: 1,
+			Score:      1,
+		},
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	client := client.New(address)
 
-	err := client.Connect(ctx, config.ClientName, codecs)
+	err := client.Connect(ctx, config.ClientName, profiles)
 	if err != nil {
 		log.Fatalf("Failed to connect to server %v", err)
 	}

@@ -6,15 +6,13 @@ import (
 	"log"
 	"sort"
 
-	"github.com/google/uuid"
-	"github.com/svaan1/tcc-go/internal/ffmpeg"
 	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
+	"github.com/svaan1/tcc-go/internal/orchestrator/jq"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// GetAllNodes returns all registered nodes with their current resource usage
 func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (*pb.GetAllNodesResponse, error) {
-	nodes, err := sv.Service.ListNodes(context.TODO())
+	nodes, err := sv.Service.ListNodes(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get nodes %v", err)
@@ -57,11 +55,8 @@ func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (
 	}, nil
 }
 
-// EnqueueJob enqueues a new transcoding job to be assigned to an available node
 func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*pb.EnqueueJobResponse, error) {
-	jobID := uuid.New().String()
-
-	err := sv.Service.EnqueueJob(ctx, &ffmpeg.EncodingParams{
+	jobID, err := sv.Service.EnqueueJob(ctx, jq.JobParams{
 		InputPath:  req.InputPath,
 		OutputPath: req.OutputPath,
 		VideoCodec: req.VideoCodec,
@@ -69,7 +64,7 @@ func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*p
 
 	if err != nil {
 		return &pb.EnqueueJobResponse{
-			JobId:   jobID,
+			JobId:   jobID.String(),
 			Success: false,
 			Message: fmt.Sprintf("Failed to enqueue job: %v", err),
 		}, nil
@@ -78,7 +73,7 @@ func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*p
 	log.Printf("Job %s enqueued", jobID)
 
 	return &pb.EnqueueJobResponse{
-		JobId:   jobID,
+		JobId:   jobID.String(),
 		Success: true,
 		Message: "Job successfully enqueued",
 	}, nil

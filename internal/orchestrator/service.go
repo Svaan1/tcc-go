@@ -35,7 +35,7 @@ func (s *Service) ListNodes(ctx context.Context) ([]*np.Node, error) {
 	return s.np.ListNodes(ctx, 0, 20)
 }
 
-func (s *Service) RegisterNode(ctx context.Context, name string, profiles []ffmpeg.EncodingProfile) (*np.Node, error) {
+func (s *Service) RegisterNode(ctx context.Context, name string, profiles []ffmpeg.EncodingProfile) (uuid.UUID, error) {
 	return s.np.RegisterNode(ctx, &np.NodeRegistration{
 		Name:     name,
 		Profiles: profiles,
@@ -60,17 +60,13 @@ func (s *Service) UpdateNodeMetrics(ctx context.Context, nodeID string, usage *m
 }
 
 // Queue
-func (s *Service) EnqueueJob(ctx context.Context, params *ffmpeg.EncodingParams) error {
-	job := &jq.Job{
-		ID:     uuid.New(),
-		Params: params,
+func (s *Service) EnqueueJob(ctx context.Context, params jq.JobParams) (uuid.UUID, error) {
+	jobID, err := s.jq.Enqueue(ctx, params)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("failed to enqueue job: %w", err)
 	}
 
-	if err := s.jq.Enqueue(ctx, job); err != nil {
-		return fmt.Errorf("failed to enqueue job: %w", err)
-	}
-
-	return nil
+	return jobID, nil
 }
 
 func (s *Service) DequeueJob(ctx context.Context) (*jq.Job, *np.Node, error) {

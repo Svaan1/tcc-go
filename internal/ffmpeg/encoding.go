@@ -2,6 +2,7 @@ package ffmpeg
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 )
 
@@ -25,6 +26,8 @@ func Encode(req *EncodingParams) error {
 	args = append(args, "-preset", req.Preset)
 
 	args = append(args, req.OutputPath)
+
+	log.Printf("Executing command: %v", args)
 
 	cmd := exec.Command("ffmpeg", args...)
 

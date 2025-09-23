@@ -27,7 +27,7 @@ type NodeFilter struct {
 }
 
 type NodePool interface {
-	RegisterNode(ctx context.Context, req *NodeRegistration) (*Node, error)
+	RegisterNode(ctx context.Context, req *NodeRegistration) (uuid.UUID, error)
 	UnregisterNode(ctx context.Context, nodeID uuid.UUID) error
 
 	UpdateNodeMetrics(ctx context.Context, nodeID uuid.UUID, usage *metrics.ResourceUsage) error

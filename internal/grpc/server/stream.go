@@ -15,13 +15,15 @@ import (
 func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	log.Printf("New connection established")
 
-	nodeID, nodeConn, err := sv.registerNode(stream)
+	ctx := stream.Context()
+
+	nodeID, nodeConn, err := sv.registerNode(ctx, stream)
 	if err != nil {
 		log.Printf("Failed to register node: %v", err)
 		return err
 	}
 
-	defer sv.unregisterNode(nodeID)
+	defer sv.unregisterNode(ctx, nodeID)
 
 	log.Printf("Starting message processing loop for node %s", nodeID)
 	for {
@@ -58,7 +60,7 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 	}
 }
 
-func (sv *Server) registerNode(stream pb.VideoTranscoding_StreamServer) (nodeID uuid.UUID, nodeConn *NodeConn, err error) {
+func (sv *Server) registerNode(ctx context.Context, stream pb.VideoTranscoding_StreamServer) (nodeID uuid.UUID, nodeConn *NodeConn, err error) {
 	msg, err := stream.Recv()
 	if err != nil {
 		return uuid.Nil, nil, fmt.Errorf("error receiving initial message: %v", err)
@@ -83,7 +85,7 @@ func (sv *Server) registerNode(stream pb.VideoTranscoding_StreamServer) (nodeID 
 		})
 	}
 
-	nodeID, err = sv.Service.RegisterNode(context.TODO(), register.Name, profiles)
+	nodeID, err = sv.Service.RegisterNode(ctx, register.Name, profiles)
 	if err != nil {
 		return uuid.Nil, nil, fmt.Errorf("failed to register node: %v", err)
 	}
@@ -101,9 +103,9 @@ func (sv *Server) registerNode(stream pb.VideoTranscoding_StreamServer) (nodeID 
 	return nodeID, nodeConn, nil
 }
 
-func (sv *Server) unregisterNode(nodeID uuid.UUID) {
+func (sv *Server) unregisterNode(ctx context.Context, nodeID uuid.UUID) {
 	sv.mu.Lock()
-	sv.Service.UnregisterNode(context.TODO(), nodeID)
+	sv.Service.UnregisterNode(ctx, nodeID)
 	delete(sv.NodeConns, nodeID)
 	sv.mu.Unlock()
 

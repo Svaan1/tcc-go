@@ -5,18 +5,23 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/svaan1/tcc-go/internal/ffmpeg"
 )
 
+type JobParams struct {
+	InputPath  string
+	OutputPath string
+	VideoCodec string
+}
+
 type Job struct {
-	ID        uuid.UUID              `json:"id"`
-	Params    *ffmpeg.EncodingParams `json:"params"`
-	CreatedAt time.Time              `json:"created_at"`
-	UpdatedAt time.Time              `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	Params    JobParams `json:"params"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type JobQueue interface {
-	Enqueue(ctx context.Context, job *Job) error
+	Enqueue(ctx context.Context, params JobParams) (uuid.UUID, error)
 	Dequeue(ctx context.Context) (*Job, error)
 	Peek(ctx context.Context) (*Job, error)
 

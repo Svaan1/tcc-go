@@ -13,8 +13,6 @@ func (c *Client) handleJobAssignment(ctx context.Context, jobRequest *pb.JobAssi
 	log.Printf("Received job assignment: ID=%s, input=%s, output=%s",
 		jobRequest.JobId, jobRequest.InputPath, jobRequest.OutputPath)
 
-	// For now, just accept all jobs
-	// In a real implementation, you would check if the node can handle the job
 	err := ffmpeg.Encode(&ffmpeg.EncodingParams{
 		InputPath:  jobRequest.InputPath,
 		OutputPath: jobRequest.OutputPath,

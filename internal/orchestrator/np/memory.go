@@ -22,9 +22,9 @@ func NewInMemoryNodePool() *InMemoryNodePool {
 	}
 }
 
-func (p *InMemoryNodePool) RegisterNode(ctx context.Context, req *NodeRegistration) (*Node, error) {
+func (p *InMemoryNodePool) RegisterNode(ctx context.Context, req *NodeRegistration) (uuid.UUID, error) {
 	if req == nil || req.Name == "" {
-		return nil, fmt.Errorf("invalid node registration")
+		return uuid.Nil, fmt.Errorf("invalid node registration")
 	}
 
 	p.mu.Lock()
@@ -43,7 +43,7 @@ func (p *InMemoryNodePool) RegisterNode(ctx context.Context, req *NodeRegistrati
 	}
 
 	p.nodes[node.ID] = node
-	return node, nil
+	return node.ID, nil
 }
 
 func (p *InMemoryNodePool) UnregisterNode(ctx context.Context, nodeID uuid.UUID) error {
