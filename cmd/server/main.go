@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 
@@ -11,9 +12,11 @@ import (
 func main() {
 	grpcAddress := net.JoinHostPort("", config.ServerPortGRPC)
 
+	ctx := context.Background()
+
 	sv := server.New(grpcAddress)
 
-	if err := sv.Serve(); err != nil {
+	if err := sv.Serve(ctx); err != nil {
 		log.Fatalf("TCP server failed: %v", err)
 	}
 }
