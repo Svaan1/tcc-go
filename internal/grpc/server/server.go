@@ -42,36 +42,35 @@ func New(address string) *Server {
 
 }
 
-func (sv *Server) Serve() error {
+func (sv *Server) Serve(ctx context.Context) error {
 	listener, err := net.Listen(sv.Config.Network, sv.Config.Address)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s %s: %w", sv.Config.Network, sv.Config.Address, err)
 	}
-
-	log.Printf("Server listening on %s %s", sv.Config.Network, sv.Config.Address)
 
 	server := grpc.NewServer()
 	pb.RegisterVideoTranscodingServer(server, sv)
 
 	reflection.Register(server)
 
-	go sv.pollJobs()
-	go sv.trackTimedOutNodes()
+	go sv.pollJobs(ctx)
+	go sv.trackTimedOutNodes(ctx)
 
-	log.Println("Starting gRPC server...")
 	if err := server.Serve(listener); err != nil {
 		return fmt.Errorf("failed to serve gRPC server: %w", err)
 	}
 
+	log.Printf("Starting gRPC server at %s %s", sv.Config.Network, sv.Config.Address)
+
 	return nil
 }
 
-func (sv *Server) pollJobs() {
+func (sv *Server) pollJobs(ctx context.Context) {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		job, node, err := sv.Service.DequeueJob(context.TODO())
+		job, node, err := sv.Service.DequeueJob(ctx)
 		if err != nil {
 			continue
 		}
@@ -92,21 +91,21 @@ func (sv *Server) pollJobs() {
 			InputPath:  job.Params.InputPath,
 			OutputPath: job.Params.OutputPath,
 			VideoCodec: job.Params.VideoCodec,
-			AudioCodec: job.Params.AudioCodec,
-			Crf:        job.Params.Crf,
-			Preset:     job.Params.Preset,
+			AudioCodec: "aac",
+			Crf:        "23",
+			Preset:     "slow",
 		})
 
 		sv.mu.Unlock()
 	}
 }
 
-func (sv *Server) trackTimedOutNodes() {
+func (sv *Server) trackTimedOutNodes(ctx context.Context) {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		nodes, err := sv.Service.GetTimedOutNodes(context.TODO(), 15*time.Second)
+		nodes, err := sv.Service.GetTimedOutNodes(ctx, 15*time.Second)
 
 		if err != nil {
 			log.Printf("Failed to get timed out nodes: %v", err)

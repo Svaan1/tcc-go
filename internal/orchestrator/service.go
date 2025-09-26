@@ -77,18 +77,18 @@ func (s *Service) DequeueJob(ctx context.Context) (*jq.Job, *np.Node, error) {
 
 	nodes, err := s.np.GetAvailableNodes(ctx, &np.NodeFilter{Codec: job.Params.VideoCodec})
 	if err != nil {
-		s.jq.Enqueue(ctx, job)
+		s.jq.Requeue(ctx, job)
 		return nil, nil, fmt.Errorf("failed to get available nodes: %w", err)
 	}
 
 	node, err := s.js.SelectBestNode(job, nodes)
 	if err != nil {
-		s.jq.Enqueue(ctx, job)
+		s.jq.Requeue(ctx, job)
 		return nil, nil, fmt.Errorf("failed to select best node: %w", err)
 	}
 
 	if err := s.jt.TrackJob(ctx, job.ID, node.ID); err != nil {
-		s.jq.Enqueue(ctx, job)
+		s.jq.Requeue(ctx, job)
 		return nil, nil, fmt.Errorf("failed to track job: %w", err)
 	}
 

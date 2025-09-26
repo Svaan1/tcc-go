@@ -16,12 +16,14 @@ type JobParams struct {
 type Job struct {
 	ID        uuid.UUID `json:"id"`
 	Params    JobParams `json:"params"`
+	Priority  int
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type JobQueue interface {
 	Enqueue(ctx context.Context, params JobParams) (uuid.UUID, error)
+	Requeue(ctx context.Context, job *Job) error
 	Dequeue(ctx context.Context) (*Job, error)
 	Peek(ctx context.Context) (*Job, error)
 
