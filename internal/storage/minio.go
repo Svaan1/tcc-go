@@ -12,15 +12,15 @@ type MinioStorage struct {
 	client *minio.Client
 }
 
-func NewMinioStorage(endpoint, accessKey, secretKey string, useSSL bool) (*MinioStorage, error) {
+func NewMinioStorage(endpoint, accessKey, secretKey string, useSSL bool) *MinioStorage {
 	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
 		Secure: useSSL,
 	})
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return &MinioStorage{client: client}, nil
+	return &MinioStorage{client: client}
 }
 
 func (m *MinioStorage) Upload(ctx context.Context, bucket, object string, r io.Reader, size int64, contentType string) error {
@@ -52,7 +52,6 @@ func (m *MinioStorage) List(ctx context.Context, bucket string) ([]string, error
 func (m *MinioStorage) Exists(ctx context.Context, bucket, object string) (bool, error) {
 	_, err := m.client.StatObject(ctx, bucket, object, minio.StatObjectOptions{})
 	if err != nil {
-		// StatObject returns error if not found
 		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
 			return false, nil
 		}

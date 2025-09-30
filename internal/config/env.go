@@ -10,7 +10,7 @@ var (
 
 	MinioHostName  = GetEnv("MINIO_HOSTNAME", "localhost:9000")
 	MinioAccessKey = GetEnv("MINIO_ACCESS_KEY", "minioadmin")
-	MInioSecretKey = GetEnv("MINIO_SECRET_KEY", "minioadmin")
+	MinioSecretKey = GetEnv("MINIO_SECRET_KEY", "minioadmin")
 
 	FileSystemStorageRoot = GetEnv("FILE_SYSTEM_STORAGE_ROOT", "./data")
 

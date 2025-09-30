@@ -7,6 +7,7 @@ import (
 
 	"github.com/svaan1/tcc-go/internal/ffmpeg"
 	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
+	"github.com/svaan1/tcc-go/internal/node"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -20,7 +21,8 @@ type ClientConfig struct {
 }
 
 type Client struct {
-	Config ClientConfig
+	Config  ClientConfig
+	Service *node.Service
 
 	nodeID string
 	conn   *grpc.ClientConn
@@ -35,9 +37,10 @@ func New(address string) *Client {
 
 			ResourceUsagePollingTickTime: 5 * time.Second,
 		},
-		nodeID: "",
-		conn:   nil,
-		stream: nil,
+		Service: node.NewService(),
+		nodeID:  "",
+		conn:    nil,
+		stream:  nil,
 	}
 }
 
