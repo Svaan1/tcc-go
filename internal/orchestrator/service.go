@@ -3,6 +3,7 @@ package orchestrator
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,6 +20,8 @@ type Service struct {
 	jt jt.JobTracker
 	js js.JobScheduler
 	np np.NodePool
+
+	mu sync.Mutex
 }
 
 func NewService() *Service {
@@ -70,7 +73,10 @@ func (s *Service) EnqueueJob(ctx context.Context, params jq.JobParams) (uuid.UUI
 }
 
 func (s *Service) DequeueJob(ctx context.Context) (*jq.Job, *np.Node, error) {
-	job, err := s.jq.Dequeue(ctx)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	job, err := s.jq.Peek(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to peek job: %w", err)
 	}

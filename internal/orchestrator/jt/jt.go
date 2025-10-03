@@ -48,7 +48,7 @@ type JobTracker interface {
 	GetJobProgress(ctx context.Context, jobID uuid.UUID) (*JobProgress, error)
 	CompleteJobTracking(ctx context.Context, jobID uuid.UUID, success bool, errorMsg string) error
 
-	GetActiveJobs(ctx context.Context) ([]*JobProgress, error)
+	GetActiveJobs(ctx context.Context) (map[uuid.UUID][]*JobProgress, error)
 	GetJobsByNode(ctx context.Context, nodeID uuid.UUID) ([]*JobProgress, error)
 	GetJobsByStatus(ctx context.Context, status JobStatus) ([]*JobProgress, error)
 

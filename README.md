@@ -19,3 +19,12 @@ Resource aware scheduling
 - Current workload/queue depth
 - Network proximity
 - Historical reliability
+
+
+TODOS:1
+- Get CPU usage on benchmark
+- Predefine encoding profiles
+- Return job result to orchestrator (success / fail)
+- Make the job dequeue consider already running jobs in each node
+- implement more strategies
+- create initial tests and a script to run them with each strategy

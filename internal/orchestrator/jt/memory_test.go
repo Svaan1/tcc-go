@@ -117,7 +117,16 @@ func TestInMemoryJobTracker_CompleteJobTracking(t *testing.T) {
 		}
 
 		// Job should be in completed jobs
-		if _, exists := tracker.completedJobs[jobID]; !exists {
+		found := false
+		for _, histories := range tracker.completedJobs {
+			for _, history := range histories {
+				if history.JobID == jobID {
+					found = true
+					break
+				}
+			}
+		}
+		if !found {
 			t.Error("expected job to be in completed jobs")
 		}
 	})
@@ -131,7 +140,19 @@ func TestInMemoryJobTracker_CompleteJobTracking(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
-		history := tracker.completedJobs[failedJobID]
+		// Find the completed job history
+		var history *JobHistory
+		for _, histories := range tracker.completedJobs {
+			for _, h := range histories {
+				if h.JobID == failedJobID {
+					history = h
+					break
+				}
+			}
+		}
+		if history == nil {
+			t.Fatal("expected to find completed job history")
+		}
 		if history.Status != JobStatusFailed {
 			t.Errorf("expected status %v, got %v", JobStatusFailed, history.Status)
 		}
@@ -151,7 +172,7 @@ func TestInMemoryJobTracker_GetActiveJobs(t *testing.T) {
 			t.Fatalf("expected no error, got %v", err)
 		}
 		if len(jobs) != 0 {
-			t.Errorf("expected 0 jobs, got %d", len(jobs))
+			t.Errorf("expected 0 nodes, got %d", len(jobs))
 		}
 	})
 
@@ -167,8 +188,11 @@ func TestInMemoryJobTracker_GetActiveJobs(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
-		if len(jobs) != 2 {
-			t.Errorf("expected 2 jobs, got %d", len(jobs))
+		if len(jobs) != 1 {
+			t.Errorf("expected 1 node, got %d", len(jobs))
+		}
+		if len(jobs[nodeID]) != 2 {
+			t.Errorf("expected 2 jobs for node, got %d", len(jobs[nodeID]))
 		}
 	})
 }
@@ -271,9 +295,15 @@ func TestInMemoryJobTracker_CleanupCompletedJobs(t *testing.T) {
 	tracker.CompleteJobTracking(ctx, job2ID, true, "")
 
 	// Manually set completion time for one job to be old
-	history := tracker.completedJobs[job1ID]
 	oldTime := time.Now().Add(-2 * time.Hour)
-	history.CompletedAt = &oldTime
+	for _, histories := range tracker.completedJobs {
+		for _, history := range histories {
+			if history.JobID == job1ID {
+				history.CompletedAt = &oldTime
+				break
+			}
+		}
+	}
 
 	err := tracker.CleanupCompletedJobs(ctx, time.Hour)
 	if err != nil {
@@ -281,12 +311,24 @@ func TestInMemoryJobTracker_CleanupCompletedJobs(t *testing.T) {
 	}
 
 	// Old job should be cleaned up
-	if _, exists := tracker.completedJobs[job1ID]; exists {
+	job1Found := false
+	job2Found := false
+	for _, histories := range tracker.completedJobs {
+		for _, history := range histories {
+			if history.JobID == job1ID {
+				job1Found = true
+			}
+			if history.JobID == job2ID {
+				job2Found = true
+			}
+		}
+	}
+	if job1Found {
 		t.Error("expected old job to be cleaned up")
 	}
 
 	// Recent job should remain
-	if _, exists := tracker.completedJobs[job2ID]; !exists {
+	if !job2Found {
 		t.Error("expected recent job to remain")
 	}
 }
@@ -303,8 +345,14 @@ func TestInMemoryJobTracker_GetStaleJobs(t *testing.T) {
 	tracker.TrackJob(ctx, job2ID, nodeID)
 
 	// Manually set one job's updated time to be stale
-	job1 := tracker.activeJobs[job1ID]
-	job1.UpdatedAt = time.Now().Add(-2 * time.Hour)
+	for _, jobs := range tracker.activeJobs {
+		for _, job := range jobs {
+			if job.JobID == job1ID {
+				job.UpdatedAt = time.Now().Add(-2 * time.Hour)
+				break
+			}
+		}
+	}
 
 	staleJobs, err := tracker.GetStaleJobs(ctx, time.Hour)
 	if err != nil {
