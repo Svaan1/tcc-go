@@ -26,6 +26,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
 # Final stage: minimal runtime image
 FROM alpine:latest
 
+# Install ffmpeg
+RUN apk add --no-cache ffmpeg
 
 # Copy timezone data and certificates from builder
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo

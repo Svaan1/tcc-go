@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.32.0
-// source: internal/grpc/transcoding/transcoding.proto
+// source: internal/grpc/proto/transcoding.proto
 
 package transcoding
 
@@ -190,5 +190,5 @@ var VideoTranscoding_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "internal/grpc/transcoding/transcoding.proto",
+	Metadata: "internal/grpc/proto/transcoding.proto",
 }

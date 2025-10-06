@@ -13,8 +13,13 @@ services:
       retries: 3
       start_period: 5s
     environment:
+      - SERVER_HOSTNAME=server
       - SERVER_PORT_GRPC=8080
       - SERVER_PORT_HTTP=8081
+      - MINIO_HOSTNAME=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - FILE_SYSTEM_STORAGE_ROOT=/data
     ports:
       - 8080:8080
 
@@ -30,6 +35,11 @@ services:
     environment:
       - SERVER_HOSTNAME=server
       - SERVER_PORT_GRPC=8080
+      - MINIO_HOSTNAME=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - FILE_SYSTEM_STORAGE_ROOT=/data
+      - NODE_NAME=client
 
   minio:
     image: minio/minio:latest

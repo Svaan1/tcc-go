@@ -47,10 +47,30 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 				sv.Service.UpdateNodeMetrics(context.TODO(),
 					payload.ResourceUsageRequest.NodeId,
 					&metrics.ResourceUsage{
-						CPUUsagePercent:    payload.ResourceUsageRequest.CpuPercent,
-						MemoryUsagePercent: payload.ResourceUsageRequest.MemoryPercent,
-						DiskUsagePercent:   payload.ResourceUsageRequest.DiskPercent,
+						CPUUsagePercent:    payload.ResourceUsageRequest.GetCpuPercent(),
+						MemoryUsagePercent: payload.ResourceUsageRequest.GetMemoryPercent(),
+						DiskUsagePercent:   payload.ResourceUsageRequest.GetDiskPercent(),
 					},
+				)
+			case *pb.NodeMessage_JobAssignmentResponse:
+				log.Printf("Node %s job assignment response for job %s: accepted=%t, message=%s",
+					nodeID,
+					payload.JobAssignmentResponse.GetJobId(),
+					payload.JobAssignmentResponse.GetAccepted(),
+					payload.JobAssignmentResponse.GetMessage(),
+				)
+
+				if !payload.JobAssignmentResponse.GetAccepted() {
+					sv.Service.RejectJob(context.TODO(),
+						payload.JobAssignmentResponse.GetJobId(),
+						payload.JobAssignmentResponse.GetMessage(),
+					)
+				}
+			case *pb.NodeMessage_JobCompletionRequest:
+				sv.Service.CompleteJob(context.TODO(),
+					payload.JobCompletionRequest.GetJobId(),
+					payload.JobCompletionRequest.GetSuccess(),
+					payload.JobCompletionRequest.GetMessage(),
 				)
 			case *pb.NodeMessage_DisconnectRequest:
 				nodeConn.SendDisconnectResponse(&pb.DisconnectResponse{Acknowledged: true})

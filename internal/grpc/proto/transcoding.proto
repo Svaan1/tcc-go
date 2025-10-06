@@ -32,6 +32,8 @@ message NodeMessage {
         RegisterRequest register_request = 2;
         ResourceUsageRequest resource_usage_request = 3;
         DisconnectRequest disconnect_request = 5;
+        JobCompletionRequest job_completion_request = 6;
+        JobAssignmentResponse job_assignment_response = 7;
     }
 }
 
@@ -81,6 +83,12 @@ message JobAssignmentRequest {
 message JobAssignmentResponse {
     string job_id = 1;
     bool accepted = 2;
+    string message = 3;
+}
+
+message JobCompletionRequest {
+    string job_id = 1;
+    bool success = 2;
     string message = 3;
 }
 

@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.8
 // 	protoc        v6.32.0
-// source: internal/grpc/transcoding/transcoding.proto
+// source: internal/grpc/proto/transcoding.proto
 
 package transcoding
 
@@ -32,7 +32,7 @@ type MessageBase struct {
 
 func (x *MessageBase) Reset() {
 	*x = MessageBase{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[0]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -44,7 +44,7 @@ func (x *MessageBase) String() string {
 func (*MessageBase) ProtoMessage() {}
 
 func (x *MessageBase) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[0]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,7 +57,7 @@ func (x *MessageBase) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageBase.ProtoReflect.Descriptor instead.
 func (*MessageBase) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{0}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *MessageBase) GetMessageId() string {
@@ -89,7 +89,7 @@ type EncodingProfile struct {
 
 func (x *EncodingProfile) Reset() {
 	*x = EncodingProfile{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[1]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -101,7 +101,7 @@ func (x *EncodingProfile) String() string {
 func (*EncodingProfile) ProtoMessage() {}
 
 func (x *EncodingProfile) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[1]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -114,7 +114,7 @@ func (x *EncodingProfile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EncodingProfile.ProtoReflect.Descriptor instead.
 func (*EncodingProfile) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{1}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *EncodingProfile) GetName() string {
@@ -175,6 +175,8 @@ type NodeMessage struct {
 	//	*NodeMessage_RegisterRequest
 	//	*NodeMessage_ResourceUsageRequest
 	//	*NodeMessage_DisconnectRequest
+	//	*NodeMessage_JobCompletionRequest
+	//	*NodeMessage_JobAssignmentResponse
 	Payload       isNodeMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -182,7 +184,7 @@ type NodeMessage struct {
 
 func (x *NodeMessage) Reset() {
 	*x = NodeMessage{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[2]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -194,7 +196,7 @@ func (x *NodeMessage) String() string {
 func (*NodeMessage) ProtoMessage() {}
 
 func (x *NodeMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[2]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -207,7 +209,7 @@ func (x *NodeMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeMessage.ProtoReflect.Descriptor instead.
 func (*NodeMessage) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{2}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *NodeMessage) GetBase() *MessageBase {
@@ -251,6 +253,24 @@ func (x *NodeMessage) GetDisconnectRequest() *DisconnectRequest {
 	return nil
 }
 
+func (x *NodeMessage) GetJobCompletionRequest() *JobCompletionRequest {
+	if x != nil {
+		if x, ok := x.Payload.(*NodeMessage_JobCompletionRequest); ok {
+			return x.JobCompletionRequest
+		}
+	}
+	return nil
+}
+
+func (x *NodeMessage) GetJobAssignmentResponse() *JobAssignmentResponse {
+	if x != nil {
+		if x, ok := x.Payload.(*NodeMessage_JobAssignmentResponse); ok {
+			return x.JobAssignmentResponse
+		}
+	}
+	return nil
+}
+
 type isNodeMessage_Payload interface {
 	isNodeMessage_Payload()
 }
@@ -267,11 +287,23 @@ type NodeMessage_DisconnectRequest struct {
 	DisconnectRequest *DisconnectRequest `protobuf:"bytes,5,opt,name=disconnect_request,json=disconnectRequest,proto3,oneof"`
 }
 
+type NodeMessage_JobCompletionRequest struct {
+	JobCompletionRequest *JobCompletionRequest `protobuf:"bytes,6,opt,name=job_completion_request,json=jobCompletionRequest,proto3,oneof"`
+}
+
+type NodeMessage_JobAssignmentResponse struct {
+	JobAssignmentResponse *JobAssignmentResponse `protobuf:"bytes,7,opt,name=job_assignment_response,json=jobAssignmentResponse,proto3,oneof"`
+}
+
 func (*NodeMessage_RegisterRequest) isNodeMessage_Payload() {}
 
 func (*NodeMessage_ResourceUsageRequest) isNodeMessage_Payload() {}
 
 func (*NodeMessage_DisconnectRequest) isNodeMessage_Payload() {}
+
+func (*NodeMessage_JobCompletionRequest) isNodeMessage_Payload() {}
+
+func (*NodeMessage_JobAssignmentResponse) isNodeMessage_Payload() {}
 
 // Messages sent FROM orchestrator TO nodes
 type OrchestratorMessage struct {
@@ -289,7 +321,7 @@ type OrchestratorMessage struct {
 
 func (x *OrchestratorMessage) Reset() {
 	*x = OrchestratorMessage{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[3]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -301,7 +333,7 @@ func (x *OrchestratorMessage) String() string {
 func (*OrchestratorMessage) ProtoMessage() {}
 
 func (x *OrchestratorMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[3]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -314,7 +346,7 @@ func (x *OrchestratorMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrchestratorMessage.ProtoReflect.Descriptor instead.
 func (*OrchestratorMessage) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{3}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *OrchestratorMessage) GetBase() *MessageBase {
@@ -390,7 +422,7 @@ type RegisterRequest struct {
 
 func (x *RegisterRequest) Reset() {
 	*x = RegisterRequest{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[4]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -402,7 +434,7 @@ func (x *RegisterRequest) String() string {
 func (*RegisterRequest) ProtoMessage() {}
 
 func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[4]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -415,7 +447,7 @@ func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterRequest.ProtoReflect.Descriptor instead.
 func (*RegisterRequest) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{4}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RegisterRequest) GetName() string {
@@ -443,7 +475,7 @@ type RegisterResponse struct {
 
 func (x *RegisterResponse) Reset() {
 	*x = RegisterResponse{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[5]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -455,7 +487,7 @@ func (x *RegisterResponse) String() string {
 func (*RegisterResponse) ProtoMessage() {}
 
 func (x *RegisterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[5]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -468,7 +500,7 @@ func (x *RegisterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterResponse.ProtoReflect.Descriptor instead.
 func (*RegisterResponse) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{5}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RegisterResponse) GetNodeId() string {
@@ -504,7 +536,7 @@ type ResourceUsageRequest struct {
 
 func (x *ResourceUsageRequest) Reset() {
 	*x = ResourceUsageRequest{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[6]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -516,7 +548,7 @@ func (x *ResourceUsageRequest) String() string {
 func (*ResourceUsageRequest) ProtoMessage() {}
 
 func (x *ResourceUsageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[6]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -529,7 +561,7 @@ func (x *ResourceUsageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceUsageRequest.ProtoReflect.Descriptor instead.
 func (*ResourceUsageRequest) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{6}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ResourceUsageRequest) GetNodeId() string {
@@ -570,7 +602,7 @@ type ResourceUsageResponse struct {
 
 func (x *ResourceUsageResponse) Reset() {
 	*x = ResourceUsageResponse{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[7]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -582,7 +614,7 @@ func (x *ResourceUsageResponse) String() string {
 func (*ResourceUsageResponse) ProtoMessage() {}
 
 func (x *ResourceUsageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[7]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -595,7 +627,7 @@ func (x *ResourceUsageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceUsageResponse.ProtoReflect.Descriptor instead.
 func (*ResourceUsageResponse) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{7}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ResourceUsageResponse) GetSuccess() bool {
@@ -627,7 +659,7 @@ type JobAssignmentRequest struct {
 
 func (x *JobAssignmentRequest) Reset() {
 	*x = JobAssignmentRequest{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[8]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -639,7 +671,7 @@ func (x *JobAssignmentRequest) String() string {
 func (*JobAssignmentRequest) ProtoMessage() {}
 
 func (x *JobAssignmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[8]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -652,7 +684,7 @@ func (x *JobAssignmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JobAssignmentRequest.ProtoReflect.Descriptor instead.
 func (*JobAssignmentRequest) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{8}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *JobAssignmentRequest) GetJobId() string {
@@ -715,7 +747,7 @@ type JobAssignmentResponse struct {
 
 func (x *JobAssignmentResponse) Reset() {
 	*x = JobAssignmentResponse{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[9]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -727,7 +759,7 @@ func (x *JobAssignmentResponse) String() string {
 func (*JobAssignmentResponse) ProtoMessage() {}
 
 func (x *JobAssignmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[9]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -740,7 +772,7 @@ func (x *JobAssignmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JobAssignmentResponse.ProtoReflect.Descriptor instead.
 func (*JobAssignmentResponse) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{9}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *JobAssignmentResponse) GetJobId() string {
@@ -764,6 +796,66 @@ func (x *JobAssignmentResponse) GetMessage() string {
 	return ""
 }
 
+type JobCompletionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Success       bool                   `protobuf:"varint,2,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JobCompletionRequest) Reset() {
+	*x = JobCompletionRequest{}
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobCompletionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobCompletionRequest) ProtoMessage() {}
+
+func (x *JobCompletionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobCompletionRequest.ProtoReflect.Descriptor instead.
+func (*JobCompletionRequest) Descriptor() ([]byte, []int) {
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *JobCompletionRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *JobCompletionRequest) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *JobCompletionRequest) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type DisconnectRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
@@ -774,7 +866,7 @@ type DisconnectRequest struct {
 
 func (x *DisconnectRequest) Reset() {
 	*x = DisconnectRequest{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[10]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -786,7 +878,7 @@ func (x *DisconnectRequest) String() string {
 func (*DisconnectRequest) ProtoMessage() {}
 
 func (x *DisconnectRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[10]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -799,7 +891,7 @@ func (x *DisconnectRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DisconnectRequest.ProtoReflect.Descriptor instead.
 func (*DisconnectRequest) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{10}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DisconnectRequest) GetNodeId() string {
@@ -825,7 +917,7 @@ type DisconnectResponse struct {
 
 func (x *DisconnectResponse) Reset() {
 	*x = DisconnectResponse{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[11]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -837,7 +929,7 @@ func (x *DisconnectResponse) String() string {
 func (*DisconnectResponse) ProtoMessage() {}
 
 func (x *DisconnectResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[11]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -850,7 +942,7 @@ func (x *DisconnectResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DisconnectResponse.ProtoReflect.Descriptor instead.
 func (*DisconnectResponse) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{11}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DisconnectResponse) GetAcknowledged() bool {
@@ -868,7 +960,7 @@ type GetAllNodesRequest struct {
 
 func (x *GetAllNodesRequest) Reset() {
 	*x = GetAllNodesRequest{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[12]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -880,7 +972,7 @@ func (x *GetAllNodesRequest) String() string {
 func (*GetAllNodesRequest) ProtoMessage() {}
 
 func (x *GetAllNodesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[12]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -893,7 +985,7 @@ func (x *GetAllNodesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllNodesRequest.ProtoReflect.Descriptor instead.
 func (*GetAllNodesRequest) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{12}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{13}
 }
 
 type NodeInfo struct {
@@ -911,7 +1003,7 @@ type NodeInfo struct {
 
 func (x *NodeInfo) Reset() {
 	*x = NodeInfo{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[13]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -923,7 +1015,7 @@ func (x *NodeInfo) String() string {
 func (*NodeInfo) ProtoMessage() {}
 
 func (x *NodeInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[13]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -936,7 +1028,7 @@ func (x *NodeInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeInfo.ProtoReflect.Descriptor instead.
 func (*NodeInfo) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{13}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *NodeInfo) GetNodeId() string {
@@ -998,7 +1090,7 @@ type GetAllNodesResponse struct {
 
 func (x *GetAllNodesResponse) Reset() {
 	*x = GetAllNodesResponse{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[14]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1010,7 +1102,7 @@ func (x *GetAllNodesResponse) String() string {
 func (*GetAllNodesResponse) ProtoMessage() {}
 
 func (x *GetAllNodesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[14]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1023,7 +1115,7 @@ func (x *GetAllNodesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllNodesResponse.ProtoReflect.Descriptor instead.
 func (*GetAllNodesResponse) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{14}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetAllNodesResponse) GetNodes() []*NodeInfo {
@@ -1051,7 +1143,7 @@ type EnqueueJobRequest struct {
 
 func (x *EnqueueJobRequest) Reset() {
 	*x = EnqueueJobRequest{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[15]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1063,7 +1155,7 @@ func (x *EnqueueJobRequest) String() string {
 func (*EnqueueJobRequest) ProtoMessage() {}
 
 func (x *EnqueueJobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[15]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1076,7 +1168,7 @@ func (x *EnqueueJobRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnqueueJobRequest.ProtoReflect.Descriptor instead.
 func (*EnqueueJobRequest) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{15}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *EnqueueJobRequest) GetInputPath() string {
@@ -1111,7 +1203,7 @@ type EnqueueJobResponse struct {
 
 func (x *EnqueueJobResponse) Reset() {
 	*x = EnqueueJobResponse{}
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[16]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1123,7 +1215,7 @@ func (x *EnqueueJobResponse) String() string {
 func (*EnqueueJobResponse) ProtoMessage() {}
 
 func (x *EnqueueJobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_internal_grpc_transcoding_transcoding_proto_msgTypes[16]
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1136,7 +1228,7 @@ func (x *EnqueueJobResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnqueueJobResponse.ProtoReflect.Descriptor instead.
 func (*EnqueueJobResponse) Descriptor() ([]byte, []int) {
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP(), []int{16}
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *EnqueueJobResponse) GetJobId() string {
@@ -1160,11 +1252,11 @@ func (x *EnqueueJobResponse) GetMessage() string {
 	return ""
 }
 
-var File_internal_grpc_transcoding_transcoding_proto protoreflect.FileDescriptor
+var File_internal_grpc_proto_transcoding_proto protoreflect.FileDescriptor
 
-const file_internal_grpc_transcoding_transcoding_proto_rawDesc = "" +
+const file_internal_grpc_proto_transcoding_proto_rawDesc = "" +
 	"\n" +
-	"+internal/grpc/transcoding/transcoding.proto\x12\vtranscoding\x1a\x1fgoogle/protobuf/timestamp.proto\"f\n" +
+	"%internal/grpc/proto/transcoding.proto\x12\vtranscoding\x1a\x1fgoogle/protobuf/timestamp.proto\"f\n" +
 	"\vMessageBase\x12\x1d\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x128\n" +
@@ -1178,12 +1270,14 @@ const file_internal_grpc_transcoding_transcoding_proto_rawDesc = "" +
 	"\vdecode_time\x18\x05 \x01(\x01R\n" +
 	"decodeTime\x12\x10\n" +
 	"\x03fps\x18\x06 \x01(\x01R\x03fps\x12\x14\n" +
-	"\x05score\x18\a \x01(\x01R\x05score\"\xbd\x02\n" +
+	"\x05score\x18\a \x01(\x01R\x05score\"\xf6\x03\n" +
 	"\vNodeMessage\x12,\n" +
 	"\x04base\x18\x01 \x01(\v2\x18.transcoding.MessageBaseR\x04base\x12I\n" +
 	"\x10register_request\x18\x02 \x01(\v2\x1c.transcoding.RegisterRequestH\x00R\x0fregisterRequest\x12Y\n" +
 	"\x16resource_usage_request\x18\x03 \x01(\v2!.transcoding.ResourceUsageRequestH\x00R\x14resourceUsageRequest\x12O\n" +
-	"\x12disconnect_request\x18\x05 \x01(\v2\x1e.transcoding.DisconnectRequestH\x00R\x11disconnectRequestB\t\n" +
+	"\x12disconnect_request\x18\x05 \x01(\v2\x1e.transcoding.DisconnectRequestH\x00R\x11disconnectRequest\x12Y\n" +
+	"\x16job_completion_request\x18\x06 \x01(\v2!.transcoding.JobCompletionRequestH\x00R\x14jobCompletionRequest\x12\\\n" +
+	"\x17job_assignment_response\x18\a \x01(\v2\".transcoding.JobAssignmentResponseH\x00R\x15jobAssignmentResponseB\t\n" +
 	"\apayload\"\xcb\x02\n" +
 	"\x13OrchestratorMessage\x12,\n" +
 	"\x04base\x18\x01 \x01(\v2\x18.transcoding.MessageBaseR\x04base\x12L\n" +
@@ -1222,6 +1316,10 @@ const file_internal_grpc_transcoding_transcoding_proto_rawDesc = "" +
 	"\x15JobAssignmentResponse\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x1a\n" +
 	"\baccepted\x18\x02 \x01(\bR\baccepted\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"a\n" +
+	"\x14JobCompletionRequest\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\"D\n" +
 	"\x11DisconnectRequest\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x16\n" +
@@ -1260,19 +1358,19 @@ const file_internal_grpc_transcoding_transcoding_proto_rawDesc = "" +
 	"EnqueueJob\x12\x1e.transcoding.EnqueueJobRequest\x1a\x1f.transcoding.EnqueueJobResponseB4Z2github.com/svaan1/tcc-go/internal/grpc/transcodingb\x06proto3"
 
 var (
-	file_internal_grpc_transcoding_transcoding_proto_rawDescOnce sync.Once
-	file_internal_grpc_transcoding_transcoding_proto_rawDescData []byte
+	file_internal_grpc_proto_transcoding_proto_rawDescOnce sync.Once
+	file_internal_grpc_proto_transcoding_proto_rawDescData []byte
 )
 
-func file_internal_grpc_transcoding_transcoding_proto_rawDescGZIP() []byte {
-	file_internal_grpc_transcoding_transcoding_proto_rawDescOnce.Do(func() {
-		file_internal_grpc_transcoding_transcoding_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_grpc_transcoding_transcoding_proto_rawDesc), len(file_internal_grpc_transcoding_transcoding_proto_rawDesc)))
+func file_internal_grpc_proto_transcoding_proto_rawDescGZIP() []byte {
+	file_internal_grpc_proto_transcoding_proto_rawDescOnce.Do(func() {
+		file_internal_grpc_proto_transcoding_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_grpc_proto_transcoding_proto_rawDesc), len(file_internal_grpc_proto_transcoding_proto_rawDesc)))
 	})
-	return file_internal_grpc_transcoding_transcoding_proto_rawDescData
+	return file_internal_grpc_proto_transcoding_proto_rawDescData
 }
 
-var file_internal_grpc_transcoding_transcoding_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
-var file_internal_grpc_transcoding_transcoding_proto_goTypes = []any{
+var file_internal_grpc_proto_transcoding_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_internal_grpc_proto_transcoding_proto_goTypes = []any{
 	(*MessageBase)(nil),           // 0: transcoding.MessageBase
 	(*EncodingProfile)(nil),       // 1: transcoding.EncodingProfile
 	(*NodeMessage)(nil),           // 2: transcoding.NodeMessage
@@ -1283,53 +1381,58 @@ var file_internal_grpc_transcoding_transcoding_proto_goTypes = []any{
 	(*ResourceUsageResponse)(nil), // 7: transcoding.ResourceUsageResponse
 	(*JobAssignmentRequest)(nil),  // 8: transcoding.JobAssignmentRequest
 	(*JobAssignmentResponse)(nil), // 9: transcoding.JobAssignmentResponse
-	(*DisconnectRequest)(nil),     // 10: transcoding.DisconnectRequest
-	(*DisconnectResponse)(nil),    // 11: transcoding.DisconnectResponse
-	(*GetAllNodesRequest)(nil),    // 12: transcoding.GetAllNodesRequest
-	(*NodeInfo)(nil),              // 13: transcoding.NodeInfo
-	(*GetAllNodesResponse)(nil),   // 14: transcoding.GetAllNodesResponse
-	(*EnqueueJobRequest)(nil),     // 15: transcoding.EnqueueJobRequest
-	(*EnqueueJobResponse)(nil),    // 16: transcoding.EnqueueJobResponse
-	(*timestamppb.Timestamp)(nil), // 17: google.protobuf.Timestamp
+	(*JobCompletionRequest)(nil),  // 10: transcoding.JobCompletionRequest
+	(*DisconnectRequest)(nil),     // 11: transcoding.DisconnectRequest
+	(*DisconnectResponse)(nil),    // 12: transcoding.DisconnectResponse
+	(*GetAllNodesRequest)(nil),    // 13: transcoding.GetAllNodesRequest
+	(*NodeInfo)(nil),              // 14: transcoding.NodeInfo
+	(*GetAllNodesResponse)(nil),   // 15: transcoding.GetAllNodesResponse
+	(*EnqueueJobRequest)(nil),     // 16: transcoding.EnqueueJobRequest
+	(*EnqueueJobResponse)(nil),    // 17: transcoding.EnqueueJobResponse
+	(*timestamppb.Timestamp)(nil), // 18: google.protobuf.Timestamp
 }
-var file_internal_grpc_transcoding_transcoding_proto_depIdxs = []int32{
-	17, // 0: transcoding.MessageBase.timestamp:type_name -> google.protobuf.Timestamp
+var file_internal_grpc_proto_transcoding_proto_depIdxs = []int32{
+	18, // 0: transcoding.MessageBase.timestamp:type_name -> google.protobuf.Timestamp
 	0,  // 1: transcoding.NodeMessage.base:type_name -> transcoding.MessageBase
 	4,  // 2: transcoding.NodeMessage.register_request:type_name -> transcoding.RegisterRequest
 	6,  // 3: transcoding.NodeMessage.resource_usage_request:type_name -> transcoding.ResourceUsageRequest
-	10, // 4: transcoding.NodeMessage.disconnect_request:type_name -> transcoding.DisconnectRequest
-	0,  // 5: transcoding.OrchestratorMessage.base:type_name -> transcoding.MessageBase
-	5,  // 6: transcoding.OrchestratorMessage.register_response:type_name -> transcoding.RegisterResponse
-	8,  // 7: transcoding.OrchestratorMessage.job_assignment_request:type_name -> transcoding.JobAssignmentRequest
-	11, // 8: transcoding.OrchestratorMessage.disconnect_response:type_name -> transcoding.DisconnectResponse
-	1,  // 9: transcoding.RegisterRequest.encoding_profiles:type_name -> transcoding.EncodingProfile
-	1,  // 10: transcoding.NodeInfo.encoding_profiles:type_name -> transcoding.EncodingProfile
-	17, // 11: transcoding.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
-	13, // 12: transcoding.GetAllNodesResponse.nodes:type_name -> transcoding.NodeInfo
-	2,  // 13: transcoding.VideoTranscoding.Stream:input_type -> transcoding.NodeMessage
-	12, // 14: transcoding.VideoTranscoding.GetAllNodes:input_type -> transcoding.GetAllNodesRequest
-	15, // 15: transcoding.VideoTranscoding.EnqueueJob:input_type -> transcoding.EnqueueJobRequest
-	3,  // 16: transcoding.VideoTranscoding.Stream:output_type -> transcoding.OrchestratorMessage
-	14, // 17: transcoding.VideoTranscoding.GetAllNodes:output_type -> transcoding.GetAllNodesResponse
-	16, // 18: transcoding.VideoTranscoding.EnqueueJob:output_type -> transcoding.EnqueueJobResponse
-	16, // [16:19] is the sub-list for method output_type
-	13, // [13:16] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	11, // 4: transcoding.NodeMessage.disconnect_request:type_name -> transcoding.DisconnectRequest
+	10, // 5: transcoding.NodeMessage.job_completion_request:type_name -> transcoding.JobCompletionRequest
+	9,  // 6: transcoding.NodeMessage.job_assignment_response:type_name -> transcoding.JobAssignmentResponse
+	0,  // 7: transcoding.OrchestratorMessage.base:type_name -> transcoding.MessageBase
+	5,  // 8: transcoding.OrchestratorMessage.register_response:type_name -> transcoding.RegisterResponse
+	8,  // 9: transcoding.OrchestratorMessage.job_assignment_request:type_name -> transcoding.JobAssignmentRequest
+	12, // 10: transcoding.OrchestratorMessage.disconnect_response:type_name -> transcoding.DisconnectResponse
+	1,  // 11: transcoding.RegisterRequest.encoding_profiles:type_name -> transcoding.EncodingProfile
+	1,  // 12: transcoding.NodeInfo.encoding_profiles:type_name -> transcoding.EncodingProfile
+	18, // 13: transcoding.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
+	14, // 14: transcoding.GetAllNodesResponse.nodes:type_name -> transcoding.NodeInfo
+	2,  // 15: transcoding.VideoTranscoding.Stream:input_type -> transcoding.NodeMessage
+	13, // 16: transcoding.VideoTranscoding.GetAllNodes:input_type -> transcoding.GetAllNodesRequest
+	16, // 17: transcoding.VideoTranscoding.EnqueueJob:input_type -> transcoding.EnqueueJobRequest
+	3,  // 18: transcoding.VideoTranscoding.Stream:output_type -> transcoding.OrchestratorMessage
+	15, // 19: transcoding.VideoTranscoding.GetAllNodes:output_type -> transcoding.GetAllNodesResponse
+	17, // 20: transcoding.VideoTranscoding.EnqueueJob:output_type -> transcoding.EnqueueJobResponse
+	18, // [18:21] is the sub-list for method output_type
+	15, // [15:18] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
-func init() { file_internal_grpc_transcoding_transcoding_proto_init() }
-func file_internal_grpc_transcoding_transcoding_proto_init() {
-	if File_internal_grpc_transcoding_transcoding_proto != nil {
+func init() { file_internal_grpc_proto_transcoding_proto_init() }
+func file_internal_grpc_proto_transcoding_proto_init() {
+	if File_internal_grpc_proto_transcoding_proto != nil {
 		return
 	}
-	file_internal_grpc_transcoding_transcoding_proto_msgTypes[2].OneofWrappers = []any{
+	file_internal_grpc_proto_transcoding_proto_msgTypes[2].OneofWrappers = []any{
 		(*NodeMessage_RegisterRequest)(nil),
 		(*NodeMessage_ResourceUsageRequest)(nil),
 		(*NodeMessage_DisconnectRequest)(nil),
+		(*NodeMessage_JobCompletionRequest)(nil),
+		(*NodeMessage_JobAssignmentResponse)(nil),
 	}
-	file_internal_grpc_transcoding_transcoding_proto_msgTypes[3].OneofWrappers = []any{
+	file_internal_grpc_proto_transcoding_proto_msgTypes[3].OneofWrappers = []any{
 		(*OrchestratorMessage_RegisterResponse)(nil),
 		(*OrchestratorMessage_JobAssignmentRequest)(nil),
 		(*OrchestratorMessage_DisconnectResponse)(nil),
@@ -1338,17 +1441,17 @@ func file_internal_grpc_transcoding_transcoding_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_grpc_transcoding_transcoding_proto_rawDesc), len(file_internal_grpc_transcoding_transcoding_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_grpc_proto_transcoding_proto_rawDesc), len(file_internal_grpc_proto_transcoding_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_internal_grpc_transcoding_transcoding_proto_goTypes,
-		DependencyIndexes: file_internal_grpc_transcoding_transcoding_proto_depIdxs,
-		MessageInfos:      file_internal_grpc_transcoding_transcoding_proto_msgTypes,
+		GoTypes:           file_internal_grpc_proto_transcoding_proto_goTypes,
+		DependencyIndexes: file_internal_grpc_proto_transcoding_proto_depIdxs,
+		MessageInfos:      file_internal_grpc_proto_transcoding_proto_msgTypes,
 	}.Build()
-	File_internal_grpc_transcoding_transcoding_proto = out.File
-	file_internal_grpc_transcoding_transcoding_proto_goTypes = nil
-	file_internal_grpc_transcoding_transcoding_proto_depIdxs = nil
+	File_internal_grpc_proto_transcoding_proto = out.File
+	file_internal_grpc_proto_transcoding_proto_goTypes = nil
+	file_internal_grpc_proto_transcoding_proto_depIdxs = nil
 }

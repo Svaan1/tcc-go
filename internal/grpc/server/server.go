@@ -88,6 +88,7 @@ func (sv *Server) pollJobs(ctx context.Context) {
 		}
 
 		conn.SendJobAssignmentRequest(&pb.JobAssignmentRequest{
+			JobId:      job.ID.String(),
 			InputPath:  job.Params.InputPath,
 			OutputPath: job.Params.OutputPath,
 			VideoCodec: job.Params.VideoCodec,

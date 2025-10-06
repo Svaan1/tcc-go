@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/svaan1/tcc-go/internal/orchestrator/jq"
+	"github.com/svaan1/tcc-go/internal/orchestrator/jt"
 	"github.com/svaan1/tcc-go/internal/orchestrator/np"
 )
 
@@ -24,7 +26,7 @@ func (rr *RoundRobinScheduler) RankNodes(ctx context.Context, job *jq.Job, nodes
 	return nodes, nil
 }
 
-func (rr *RoundRobinScheduler) SelectBestNode(job *jq.Job, availableNodes []*np.Node) (*np.Node, error) {
+func (rr *RoundRobinScheduler) SelectBestNode(job *jq.Job, availableNodes []*np.Node, activeJobs map[uuid.UUID][]*jt.JobProgress) (*np.Node, error) {
 	rr.mu.Lock()
 	defer rr.mu.Unlock()
 
@@ -32,12 +34,27 @@ func (rr *RoundRobinScheduler) SelectBestNode(job *jq.Job, availableNodes []*np.
 		return nil, fmt.Errorf("no available nodes")
 	}
 
-	if rr.nextIdx >= len(availableNodes) {
-		rr.nextIdx = 0
+	// Count jobs per node
+	nodeJobCount := make(map[uuid.UUID]int)
+	for _, jobs := range activeJobs {
+		for _, jobProgress := range jobs {
+			nodeJobCount[jobProgress.NodeID]++
+		}
 	}
 
-	bestNode := availableNodes[rr.nextIdx]
-	rr.nextIdx++
+	// Try to find a node with zero jobs
+	// Start from nextIdx and wrap around
+	startIdx := rr.nextIdx
+	for i := range availableNodes {
+		idx := (startIdx + i) % len(availableNodes)
+		node := availableNodes[idx]
 
-	return bestNode, nil
+		if nodeJobCount[node.ID] == 0 {
+			rr.nextIdx = (idx + 1) % len(availableNodes)
+			return node, nil
+		}
+	}
+
+	// If all nodes have at least one job, return error to requeue
+	return nil, fmt.Errorf("no available nodes without active jobs")
 }

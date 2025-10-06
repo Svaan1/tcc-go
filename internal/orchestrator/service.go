@@ -76,7 +76,7 @@ func (s *Service) DequeueJob(ctx context.Context) (*jq.Job, *np.Node, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	job, err := s.jq.Peek(ctx)
+	job, err := s.jq.Dequeue(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to peek job: %w", err)
 	}
@@ -87,7 +87,13 @@ func (s *Service) DequeueJob(ctx context.Context) (*jq.Job, *np.Node, error) {
 		return nil, nil, fmt.Errorf("failed to get available nodes: %w", err)
 	}
 
-	node, err := s.js.SelectBestNode(job, nodes)
+	activeJobs, err := s.jt.GetActiveJobs(ctx)
+	if err != nil {
+		s.jq.Requeue(ctx, job)
+		return nil, nil, fmt.Errorf("failed to get current active jobs %v", err)
+	}
+
+	node, err := s.js.SelectBestNode(job, nodes, activeJobs)
 	if err != nil {
 		s.jq.Requeue(ctx, job)
 		return nil, nil, fmt.Errorf("failed to select best node: %w", err)
@@ -99,4 +105,41 @@ func (s *Service) DequeueJob(ctx context.Context) (*jq.Job, *np.Node, error) {
 	}
 
 	return job, node, nil
+}
+
+func (s *Service) CompleteJob(ctx context.Context, jobID string, success bool, errorMsg string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	parsedID, err := uuid.Parse(jobID)
+	if err != nil {
+		return err
+	}
+
+	return s.jt.CompleteJobTracking(ctx, parsedID, success, errorMsg)
+}
+
+func (s *Service) RejectJob(ctx context.Context, jobID string, reason string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	parsedID, err := uuid.Parse(jobID)
+	if err != nil {
+		return err
+	}
+
+	// Remove the job from tracking
+	if err := s.jt.CompleteJobTracking(ctx, parsedID, false, fmt.Sprintf("Job rejected: %s", reason)); err != nil {
+		return fmt.Errorf("failed to complete job tracking: %w", err)
+	}
+
+	// Re-queue the job so it can be assigned to another node
+	job := &jq.Job{
+		ID: parsedID,
+	}
+	if err := s.jq.Requeue(ctx, job); err != nil {
+		return fmt.Errorf("failed to requeue job: %w", err)
+	}
+
+	return nil
 }
