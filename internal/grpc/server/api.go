@@ -57,9 +57,9 @@ func (sv *Server) GetAllNodes(ctx context.Context, req *pb.GetAllNodesRequest) (
 
 func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*pb.EnqueueJobResponse, error) {
 	jobID, err := sv.Service.EnqueueJob(ctx, jq.JobParams{
-		InputPath:  req.InputPath,
-		OutputPath: req.OutputPath,
-		VideoCodec: req.VideoCodec,
+		InputPath:   req.InputPath,
+		OutputPath:  req.OutputPath,
+		ProfileName: req.ProfileName,
 	})
 
 	if err != nil {

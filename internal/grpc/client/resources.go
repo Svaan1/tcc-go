@@ -20,13 +20,12 @@ func (c *Client) handleResourceUsagePolling(ctx context.Context) {
 			return
 		case <-ticker.C:
 
-			resources, err := metrics.GetHostAvailableResources()
+			resources, err := metrics.GetAvailableResources()
 			if err != nil {
 				log.Printf("Failed to fetch available resources: %v", err)
 				continue
 			}
 
-			// Create resource usage message
 			resourceMsg := &pb.NodeMessage{
 				Base: &pb.MessageBase{
 					MessageId: "resource-usage-" + c.nodeID,
@@ -48,8 +47,6 @@ func (c *Client) handleResourceUsagePolling(ctx context.Context) {
 				continue
 			}
 
-			log.Printf("Sent resource usage: CPU=%.2f%%, Memory=%.2f%%, Disk=%.2f%%",
-				resources.CPUUsagePercent, resources.MemoryUsagePercent, resources.DiskUsagePercent)
 		}
 	}
 }

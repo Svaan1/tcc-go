@@ -88,13 +88,10 @@ func (sv *Server) pollJobs(ctx context.Context) {
 		}
 
 		conn.SendJobAssignmentRequest(&pb.JobAssignmentRequest{
-			JobId:      job.ID.String(),
-			InputPath:  job.Params.InputPath,
-			OutputPath: job.Params.OutputPath,
-			VideoCodec: job.Params.VideoCodec,
-			AudioCodec: "aac",
-			Crf:        "23",
-			Preset:     "slow",
+			JobId:       job.ID.String(),
+			InputPath:   job.Params.InputPath,
+			OutputPath:  job.Params.OutputPath,
+			ProfileName: job.Params.ProfileName,
 		})
 
 		sv.mu.Unlock()

@@ -14,27 +14,13 @@ import (
 )
 
 func main() {
+	profiles := getProfiles()
+
 	address := net.JoinHostPort(config.ServerHostName, config.ServerPortGRPC)
-
-	profiles := []ffmpeg.EncodingProfile{
-		{
-			Name:  "264-slow",
-			Codec: "libx264",
-			Params: []string{
-				"-preset", "slow",
-				"-crf", "23",
-			},
-
-			EncodeTime: 1,
-			DecodeTime: 1,
-			Score:      1,
-		},
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
-	client := client.New(address)
+	clientConn := client.New(address, profiles)
 
-	err := client.Connect(ctx, config.ClientName, profiles)
+	err := clientConn.Connect(ctx, config.ClientName, profiles)
 	if err != nil {
 		log.Fatalf("Failed to connect to server %v", err)
 	}
@@ -49,9 +35,48 @@ func main() {
 	case <-sigChan:
 		log.Println("Received shutdown signal, disconnecting...")
 		cancel()
-		client.Close()
+		clientConn.Close()
 	case <-ctx.Done():
 		log.Println("Context cancelled, shutting down...")
-		client.Close()
+		clientConn.Close()
 	}
+}
+
+func getProfiles() []ffmpeg.EncodingProfile {
+	profileNames := ffmpeg.ParseProfileNames(config.EncodingProfiles)
+	if len(profileNames) == 0 {
+		log.Fatal("No encoding profiles specified. Set ENCODING_PROFILES environment variable (e.g., 'H264_Web_Streaming_1080p;VP9_Web_Optimized_1080p')")
+	}
+
+	profiles, err := ffmpeg.GetProfilesByNames(profileNames)
+	if err != nil {
+		log.Fatalf("Failed to get encoding profiles: %v", err)
+	}
+
+	log.Printf("Selected profiles: %v", profileNames)
+
+	log.Println("Generating test video for benchmarking...")
+
+	testVideo, err := ffmpeg.GenerateVideoSample(10, "1920x1080")
+	if err != nil {
+		log.Fatalf("Failed to generate test video: %v", err)
+	}
+	defer os.Remove(testVideo)
+
+	log.Printf("Test video generated: %s", testVideo)
+
+	log.Println("Benchmarking encoding profiles...")
+
+	benchmarkedProfiles, err := ffmpeg.BenchmarkProfiles(profiles, testVideo)
+	if err != nil {
+		log.Fatalf("Failed to benchmark profiles: %v", err)
+	}
+
+	log.Println("Benchmark Results:")
+	for _, profile := range benchmarkedProfiles {
+		log.Printf("  %s: Encode=%.2fs, Decode=%.2fs, FPS=%.2f, Score=%.2f",
+			profile.Name, profile.EncodeTime, profile.DecodeTime, profile.FPS, profile.Score)
+	}
+
+	return benchmarkedProfiles
 }

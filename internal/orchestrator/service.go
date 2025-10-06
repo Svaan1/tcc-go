@@ -81,7 +81,7 @@ func (s *Service) DequeueJob(ctx context.Context) (*jq.Job, *np.Node, error) {
 		return nil, nil, fmt.Errorf("failed to peek job: %w", err)
 	}
 
-	nodes, err := s.np.GetAvailableNodes(ctx, &np.NodeFilter{Codec: job.Params.VideoCodec})
+	nodes, err := s.np.GetAvailableNodes(ctx, &np.NodeFilter{ProfileName: job.Params.ProfileName})
 	if err != nil {
 		s.jq.Requeue(ctx, job)
 		return nil, nil, fmt.Errorf("failed to get available nodes: %w", err)

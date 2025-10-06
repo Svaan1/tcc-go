@@ -8,9 +8,9 @@ import (
 )
 
 type JobParams struct {
-	InputPath  string
-	OutputPath string
-	VideoCodec string
+	InputPath   string
+	OutputPath  string
+	ProfileName string
 }
 
 type Job struct {

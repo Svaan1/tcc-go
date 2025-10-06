@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 
-	"github.com/svaan1/tcc-go/internal/ffmpeg"
 	pb "github.com/svaan1/tcc-go/internal/grpc/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -40,10 +39,8 @@ func (c *Client) handleStream(ctx context.Context) {
 			case *pb.OrchestratorMessage_JobAssignmentRequest:
 				jobRequest := payload.JobAssignmentRequest
 
-				// First, check if the node accepts the job
-				accepted, message := c.Service.AcceptJobAssignment(ctx, jobRequest.JobId, jobRequest.InputPath, jobRequest.OutputPath)
+				accepted, message := c.Service.AcceptJobAssignment(ctx, jobRequest.JobId, jobRequest.InputPath, jobRequest.OutputPath, jobRequest.ProfileName)
 
-				// Send job assignment response
 				jobAssignmentResponseMsg := &pb.NodeMessage{
 					Base: &pb.MessageBase{
 						MessageId: "job-assignment-response-" + jobRequest.JobId,
@@ -70,12 +67,11 @@ func (c *Client) handleStream(ctx context.Context) {
 				}
 
 				go func() {
-					err := c.Service.HandleJobAssignment(ctx, jobRequest.InputPath, jobRequest.OutputPath, ffmpeg.EncodingParams{
-						VideoCodec: jobRequest.VideoCodec,
-						AudioCodec: jobRequest.AudioCodec,
-						Crf:        jobRequest.Crf,
-						Preset:     jobRequest.Preset,
-					})
+					err := c.Service.HandleJobAssignment(ctx, jobRequest.InputPath, jobRequest.OutputPath, jobRequest.ProfileName)
+
+					if err != nil {
+						log.Printf("Failed to handle job assignment: %v", err)
+					}
 
 					jobCompletionMsg := &pb.NodeMessage{
 						Base: &pb.MessageBase{
@@ -96,8 +92,8 @@ func (c *Client) handleStream(ctx context.Context) {
 						},
 					}
 
-					if sendErr := c.stream.Send(jobCompletionMsg); sendErr != nil {
-						log.Printf("Failed to send job completion message: %v", sendErr)
+					if err := c.stream.Send(jobCompletionMsg); err != nil {
+						log.Printf("Failed to send job completion message: %v", err)
 					}
 				}()
 			case *pb.OrchestratorMessage_DisconnectResponse:

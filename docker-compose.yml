@@ -1,10 +1,33 @@
 services:
+  minio:
+    image: minio/minio:latest
+    networks:
+      - tcc-network
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./data/minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
   server:
     build:
       context: .
       dockerfile: docker/server.Dockerfile
     networks:
       - tcc-network
+    depends_on:
+      - minio
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nodes"]
@@ -31,6 +54,7 @@ services:
       - tcc-network
     depends_on:
       - server
+      - minio
     restart: unless-stopped
     environment:
       - SERVER_HOSTNAME=server
@@ -40,27 +64,10 @@ services:
       - MINIO_SECRET_KEY=minioadmin
       - FILE_SYSTEM_STORAGE_ROOT=/data
       - NODE_NAME=client
-
-  minio:
-    image: minio/minio:latest
-    networks:
-      - tcc-network
-    restart: unless-stopped
-    environment:
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=minioadmin
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - ./data/minio:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.35'
 
 networks:
   tcc-network:

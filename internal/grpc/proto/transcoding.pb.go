@@ -649,10 +649,7 @@ type JobAssignmentRequest struct {
 	JobId         string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
 	InputPath     string                 `protobuf:"bytes,2,opt,name=input_path,json=inputPath,proto3" json:"input_path,omitempty"`
 	OutputPath    string                 `protobuf:"bytes,3,opt,name=output_path,json=outputPath,proto3" json:"output_path,omitempty"`
-	Crf           string                 `protobuf:"bytes,4,opt,name=crf,proto3" json:"crf,omitempty"`
-	Preset        string                 `protobuf:"bytes,5,opt,name=preset,proto3" json:"preset,omitempty"`
-	AudioCodec    string                 `protobuf:"bytes,6,opt,name=audio_codec,json=audioCodec,proto3" json:"audio_codec,omitempty"`
-	VideoCodec    string                 `protobuf:"bytes,7,opt,name=video_codec,json=videoCodec,proto3" json:"video_codec,omitempty"`
+	ProfileName   string                 `protobuf:"bytes,4,opt,name=profile_name,json=profileName,proto3" json:"profile_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -708,30 +705,9 @@ func (x *JobAssignmentRequest) GetOutputPath() string {
 	return ""
 }
 
-func (x *JobAssignmentRequest) GetCrf() string {
+func (x *JobAssignmentRequest) GetProfileName() string {
 	if x != nil {
-		return x.Crf
-	}
-	return ""
-}
-
-func (x *JobAssignmentRequest) GetPreset() string {
-	if x != nil {
-		return x.Preset
-	}
-	return ""
-}
-
-func (x *JobAssignmentRequest) GetAudioCodec() string {
-	if x != nil {
-		return x.AudioCodec
-	}
-	return ""
-}
-
-func (x *JobAssignmentRequest) GetVideoCodec() string {
-	if x != nil {
-		return x.VideoCodec
+		return x.ProfileName
 	}
 	return ""
 }
@@ -1136,7 +1112,7 @@ type EnqueueJobRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	InputPath     string                 `protobuf:"bytes,1,opt,name=input_path,json=inputPath,proto3" json:"input_path,omitempty"`
 	OutputPath    string                 `protobuf:"bytes,2,opt,name=output_path,json=outputPath,proto3" json:"output_path,omitempty"`
-	VideoCodec    string                 `protobuf:"bytes,6,opt,name=video_codec,json=videoCodec,proto3" json:"video_codec,omitempty"`
+	ProfileName   string                 `protobuf:"bytes,3,opt,name=profile_name,json=profileName,proto3" json:"profile_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1185,9 +1161,9 @@ func (x *EnqueueJobRequest) GetOutputPath() string {
 	return ""
 }
 
-func (x *EnqueueJobRequest) GetVideoCodec() string {
+func (x *EnqueueJobRequest) GetProfileName() string {
 	if x != nil {
-		return x.VideoCodec
+		return x.ProfileName
 	}
 	return ""
 }
@@ -1300,19 +1276,14 @@ const file_internal_grpc_proto_transcoding_proto_rawDesc = "" +
 	"\fdisk_percent\x18\x04 \x01(\x01R\vdiskPercent\"K\n" +
 	"\x15ResourceUsageResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xd9\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x90\x01\n" +
 	"\x14JobAssignmentRequest\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x1d\n" +
 	"\n" +
 	"input_path\x18\x02 \x01(\tR\tinputPath\x12\x1f\n" +
 	"\voutput_path\x18\x03 \x01(\tR\n" +
-	"outputPath\x12\x10\n" +
-	"\x03crf\x18\x04 \x01(\tR\x03crf\x12\x16\n" +
-	"\x06preset\x18\x05 \x01(\tR\x06preset\x12\x1f\n" +
-	"\vaudio_codec\x18\x06 \x01(\tR\n" +
-	"audioCodec\x12\x1f\n" +
-	"\vvideo_codec\x18\a \x01(\tR\n" +
-	"videoCodec\"d\n" +
+	"outputPath\x12!\n" +
+	"\fprofile_name\x18\x04 \x01(\tR\vprofileName\"d\n" +
 	"\x15JobAssignmentResponse\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x1a\n" +
 	"\baccepted\x18\x02 \x01(\bR\baccepted\x12\x18\n" +
@@ -1339,14 +1310,13 @@ const file_internal_grpc_proto_transcoding_proto_rawDesc = "" +
 	"\x13GetAllNodesResponse\x12+\n" +
 	"\x05nodes\x18\x01 \x03(\v2\x15.transcoding.NodeInfoR\x05nodes\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x05R\n" +
-	"totalCount\"t\n" +
+	"totalCount\"v\n" +
 	"\x11EnqueueJobRequest\x12\x1d\n" +
 	"\n" +
 	"input_path\x18\x01 \x01(\tR\tinputPath\x12\x1f\n" +
 	"\voutput_path\x18\x02 \x01(\tR\n" +
-	"outputPath\x12\x1f\n" +
-	"\vvideo_codec\x18\x06 \x01(\tR\n" +
-	"videoCodec\"_\n" +
+	"outputPath\x12!\n" +
+	"\fprofile_name\x18\x03 \x01(\tR\vprofileName\"_\n" +
 	"\x12EnqueueJobResponse\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +

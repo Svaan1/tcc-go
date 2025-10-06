@@ -15,6 +15,8 @@ var (
 	FileSystemStorageRoot = GetEnv("FILE_SYSTEM_STORAGE_ROOT", "./data")
 
 	ClientName = GetEnv("NODE_NAME", "node")
+
+	EncodingProfiles = GetEnv("ENCODING_PROFILES", "H264_1080p")
 )
 
 func GetEnv(key, fallback string) string {

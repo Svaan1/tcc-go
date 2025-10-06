@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -15,33 +16,56 @@ type ResourceUsage struct {
 }
 
 func getContainerCPUPercent(interval time.Duration) (float64, error) {
-	quota, err := readInt64("/sys/fs/cgroup/cpu/cpu.cfs_quota_us")
+	maxData, err := os.ReadFile("/sys/fs/cgroup/cpu.max")
 	if err != nil {
 		return 0, err
 	}
 
-	period, err := readInt64("/sys/fs/cgroup/cpu/cpu.cfs_period_us")
-	if err != nil {
-		return 0, err
+	fields := strings.Fields(string(maxData))
+	if len(fields) != 2 {
+		return 0, fmt.Errorf("unexpected cpu.max format")
 	}
 
-	usage1, err := readInt64("/sys/fs/cgroup/cpuacct/cpuacct.usage")
+	var quota, period int64
+	if fields[0] == "max" {
+		return 0, nil
+	}
+	quota, _ = strconv.ParseInt(fields[0], 10, 64)
+	period, _ = strconv.ParseInt(fields[1], 10, 64)
+
+	usage1, err := readCPUUsageV2()
 	if err != nil {
 		return 0, err
 	}
 
 	time.Sleep(interval)
 
-	usage2, err := readInt64("/sys/fs/cgroup/cpuacct/cpuacct.usage")
+	usage2, err := readCPUUsageV2()
 	if err != nil {
 		return 0, err
 	}
 
 	maxCores := float64(quota) / float64(period)
-	deltaUsageSec := float64(usage2-usage1) / 1_000_000_000
+	deltaUsageSec := float64(usage2-usage1) / 1_000_000
 	percent := (deltaUsageSec / interval.Seconds()) / maxCores * 100
-
 	return percent, nil
+}
+
+func readCPUUsageV2() (int64, error) {
+	data, err := os.ReadFile("/sys/fs/cgroup/cpu.stat")
+	if err != nil {
+		return 0, err
+	}
+
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "usage_usec ") {
+			fields := strings.Fields(line)
+			if len(fields) == 2 {
+				return strconv.ParseInt(fields[1], 10, 64)
+			}
+		}
+	}
+	return 0, fmt.Errorf("usage_usec not found in cpu.stat")
 }
 
 func getMemoryUsagePercent() (float64, error) {
@@ -159,7 +183,15 @@ func GetHostAvailableResources() (ResourceUsage, error) {
 	}, nil
 }
 
-func IsRunningInDocker() bool {
+func GetAvailableResources() (ResourceUsage, error) {
+	if isRunningInDocker() {
+		return GetContainerAvailableResources()
+	}
+
+	return GetHostAvailableResources()
+}
+
+func isRunningInDocker() bool {
 	if _, err := os.Stat("/.dockerenv"); err == nil {
 		return true
 	}

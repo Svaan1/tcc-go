@@ -7,22 +7,16 @@ import (
 	"os/exec"
 )
 
-type EncodingParams struct {
-	VideoCodec string
-	AudioCodec string
-	Crf        string
-	Preset     string
-}
-
-func Encode(req EncodingParams, input io.Reader, output io.Writer) error {
+// EncodeWithProfile encodes video using a predefined EncodingProfile
+func EncodeWithProfile(profile EncodingProfile, input io.Reader, output io.Writer) error {
 	args := []string{
 		"-i", "pipe:0",
 	}
 
-	args = append(args, "-c:v", req.VideoCodec)
-	args = append(args, "-c:a", req.AudioCodec)
-	args = append(args, "-crf", req.Crf)
-	args = append(args, "-preset", req.Preset)
+	// Append all parameters from the profile
+	args = append(args, profile.Params...)
+
+	// Add output format settings for streaming
 	args = append(args, "-f", "mp4")
 	args = append(args, "-movflags", "frag_keyframe+empty_moov")
 	args = append(args, "pipe:1")

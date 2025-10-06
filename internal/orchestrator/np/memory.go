@@ -125,12 +125,12 @@ func (p *InMemoryNodePool) GetAvailableNodes(ctx context.Context, requirements *
 }
 
 func (p *InMemoryNodePool) nodeMatchesRequirements(node *Node, requirements *NodeFilter) bool {
-	if requirements == nil || len(requirements.Codec) == 0 {
+	if requirements == nil || len(requirements.ProfileName) == 0 {
 		return true
 	}
 
 	for _, profile := range node.Profiles {
-		if profile.Codec == requirements.Codec {
+		if profile.Name == requirements.ProfileName {
 			return true
 		}
 	}

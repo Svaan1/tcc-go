@@ -23,7 +23,7 @@ type Node struct {
 }
 
 type NodeFilter struct {
-	Codec string `json:"codec"`
+	ProfileName string `json:"profile_name"`
 }
 
 type NodePool interface {

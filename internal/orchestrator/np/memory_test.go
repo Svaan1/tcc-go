@@ -199,21 +199,21 @@ func TestGetAvailableNodes(t *testing.T) {
 	node1Req := &NodeRegistration{
 		Name: "node1",
 		Profiles: []ffmpeg.EncodingProfile{
-			{Codec: "h264"},
-			{Codec: "h265"},
+			{Name: "H264_1080p", Codec: "libx264"},
+			{Name: "HEVC_4K", Codec: "libx265"},
 		},
 	}
 	node2Req := &NodeRegistration{
 		Name: "node2",
 		Profiles: []ffmpeg.EncodingProfile{
-			{Codec: "h264"},
-			{Codec: "vp9"},
+			{Name: "H264_1080p", Codec: "libx264"},
+			{Name: "VP9_1080p", Codec: "libvpx-vp9"},
 		},
 	}
 	node3Req := &NodeRegistration{
 		Name: "node3",
 		Profiles: []ffmpeg.EncodingProfile{
-			{Codec: "h265"},
+			{Name: "HEVC_4K", Codec: "libx265"},
 		},
 	}
 
@@ -232,7 +232,7 @@ func TestGetAvailableNodes(t *testing.T) {
 	})
 
 	t.Run("empty requirements", func(t *testing.T) {
-		filter := &NodeFilter{Codec: ""}
+		filter := &NodeFilter{ProfileName: ""}
 		nodes, err := pool.GetAvailableNodes(ctx, filter)
 		if err != nil {
 			t.Fatalf("GetAvailableNodes() failed: %v", err)
@@ -242,30 +242,30 @@ func TestGetAvailableNodes(t *testing.T) {
 		}
 	})
 
-	t.Run("filter by h264", func(t *testing.T) {
-		filter := &NodeFilter{Codec: "h264"}
+	t.Run("filter by H264_1080p", func(t *testing.T) {
+		filter := &NodeFilter{ProfileName: "H264_1080p"}
 		nodes, err := pool.GetAvailableNodes(ctx, filter)
 		if err != nil {
 			t.Fatalf("GetAvailableNodes() failed: %v", err)
 		}
 		if len(nodes) != 2 {
-			t.Errorf("expected 2 nodes with h264, got %d", len(nodes))
+			t.Errorf("expected 2 nodes with H264_1080p, got %d", len(nodes))
 		}
 	})
 
-	t.Run("filter by h265", func(t *testing.T) {
-		filter := &NodeFilter{Codec: "h265"}
+	t.Run("filter by HEVC_4K", func(t *testing.T) {
+		filter := &NodeFilter{ProfileName: "HEVC_4K"}
 		nodes, err := pool.GetAvailableNodes(ctx, filter)
 		if err != nil {
 			t.Fatalf("GetAvailableNodes() failed: %v", err)
 		}
 		if len(nodes) != 2 {
-			t.Errorf("expected 2 nodes with h265, got %d", len(nodes))
+			t.Errorf("expected 2 nodes with HEVC_4K, got %d", len(nodes))
 		}
 	})
 
-	t.Run("filter by non-existent codec", func(t *testing.T) {
-		filter := &NodeFilter{Codec: "av1"}
+	t.Run("filter by non-existent profile", func(t *testing.T) {
+		filter := &NodeFilter{ProfileName: "AV1_1080p"}
 		nodes, err := pool.GetAvailableNodes(ctx, filter)
 		if err != nil {
 			t.Fatalf("GetAvailableNodes() failed: %v", err)

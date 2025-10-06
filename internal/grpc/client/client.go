@@ -21,26 +21,26 @@ type ClientConfig struct {
 }
 
 type Client struct {
-	Config  ClientConfig
 	Service *node.Service
+	Config  ClientConfig
 
 	nodeID string
 	conn   *grpc.ClientConn
 	stream grpc.BidiStreamingClient[pb.NodeMessage, pb.OrchestratorMessage]
 }
 
-func New(address string) *Client {
+func New(address string, profiles []ffmpeg.EncodingProfile) *Client {
 	return &Client{
+		Service: node.NewService(profiles),
 		Config: ClientConfig{
 			Network: "tcp",
 			Address: address,
 
 			ResourceUsagePollingTickTime: 5 * time.Second,
 		},
-		Service: node.NewService(),
-		nodeID:  "",
-		conn:    nil,
-		stream:  nil,
+		nodeID: "",
+		conn:   nil,
+		stream: nil,
 	}
 }
 
