@@ -143,3 +143,62 @@ func (s *Service) RejectJob(ctx context.Context, jobID string, reason string) er
 
 	return nil
 }
+
+func (s *Service) GetQueueInfo(ctx context.Context) ([]*jq.Job, map[uuid.UUID][]*jt.JobProgress, error) {
+	// Get pending jobs from queue
+	pendingJobs, err := s.jq.ListJobs(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get pending jobs: %w", err)
+	}
+
+	// Get active (processing) jobs from tracker
+	activeJobs, err := s.jt.GetActiveJobs(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get active jobs: %w", err)
+	}
+
+	return pendingJobs, activeJobs, nil
+}
+
+func (s *Service) GetJobHistory(ctx context.Context, statusFilter string, limit int) ([]*jt.JobHistory, error) {
+	var jobs []*jt.JobHistory
+	var err error
+
+	if statusFilter == "" {
+		jobs, err = s.jt.GetCompletedJobs(ctx)
+	} else {
+		var status jt.JobStatus
+		switch statusFilter {
+		case "completed":
+			status = jt.JobStatusCompleted
+		case "failed":
+			status = jt.JobStatusFailed
+		default:
+			return nil, fmt.Errorf("invalid status filter: %s", statusFilter)
+		}
+		jobs, err = s.jt.GetCompletedJobsByStatus(ctx, status)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get job history: %w", err)
+	}
+
+	// Apply limit if specified
+	if limit > 0 && len(jobs) > limit {
+		jobs = jobs[:limit]
+	}
+
+	return jobs, nil
+}
+
+func (s *Service) ClearQueue(ctx context.Context) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	count, err := s.jq.ClearQueue(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to clear queue: %w", err)
+	}
+
+	return count, nil
+}

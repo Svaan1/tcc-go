@@ -19,9 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	VideoTranscoding_Stream_FullMethodName      = "/transcoding.VideoTranscoding/Stream"
-	VideoTranscoding_GetAllNodes_FullMethodName = "/transcoding.VideoTranscoding/GetAllNodes"
-	VideoTranscoding_EnqueueJob_FullMethodName  = "/transcoding.VideoTranscoding/EnqueueJob"
+	VideoTranscoding_Stream_FullMethodName        = "/transcoding.VideoTranscoding/Stream"
+	VideoTranscoding_GetAllNodes_FullMethodName   = "/transcoding.VideoTranscoding/GetAllNodes"
+	VideoTranscoding_EnqueueJob_FullMethodName    = "/transcoding.VideoTranscoding/EnqueueJob"
+	VideoTranscoding_GetQueue_FullMethodName      = "/transcoding.VideoTranscoding/GetQueue"
+	VideoTranscoding_GetJobHistory_FullMethodName = "/transcoding.VideoTranscoding/GetJobHistory"
+	VideoTranscoding_ClearQueue_FullMethodName    = "/transcoding.VideoTranscoding/ClearQueue"
 )
 
 // VideoTranscodingClient is the client API for VideoTranscoding service.
@@ -32,6 +35,9 @@ type VideoTranscodingClient interface {
 	Stream(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[NodeMessage, OrchestratorMessage], error)
 	GetAllNodes(ctx context.Context, in *GetAllNodesRequest, opts ...grpc.CallOption) (*GetAllNodesResponse, error)
 	EnqueueJob(ctx context.Context, in *EnqueueJobRequest, opts ...grpc.CallOption) (*EnqueueJobResponse, error)
+	GetQueue(ctx context.Context, in *GetQueueRequest, opts ...grpc.CallOption) (*GetQueueResponse, error)
+	GetJobHistory(ctx context.Context, in *GetJobHistoryRequest, opts ...grpc.CallOption) (*GetJobHistoryResponse, error)
+	ClearQueue(ctx context.Context, in *ClearQueueRequest, opts ...grpc.CallOption) (*ClearQueueResponse, error)
 }
 
 type videoTranscodingClient struct {
@@ -75,6 +81,36 @@ func (c *videoTranscodingClient) EnqueueJob(ctx context.Context, in *EnqueueJobR
 	return out, nil
 }
 
+func (c *videoTranscodingClient) GetQueue(ctx context.Context, in *GetQueueRequest, opts ...grpc.CallOption) (*GetQueueResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetQueueResponse)
+	err := c.cc.Invoke(ctx, VideoTranscoding_GetQueue_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *videoTranscodingClient) GetJobHistory(ctx context.Context, in *GetJobHistoryRequest, opts ...grpc.CallOption) (*GetJobHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetJobHistoryResponse)
+	err := c.cc.Invoke(ctx, VideoTranscoding_GetJobHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *videoTranscodingClient) ClearQueue(ctx context.Context, in *ClearQueueRequest, opts ...grpc.CallOption) (*ClearQueueResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ClearQueueResponse)
+	err := c.cc.Invoke(ctx, VideoTranscoding_ClearQueue_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // VideoTranscodingServer is the server API for VideoTranscoding service.
 // All implementations must embed UnimplementedVideoTranscodingServer
 // for forward compatibility.
@@ -83,6 +119,9 @@ type VideoTranscodingServer interface {
 	Stream(grpc.BidiStreamingServer[NodeMessage, OrchestratorMessage]) error
 	GetAllNodes(context.Context, *GetAllNodesRequest) (*GetAllNodesResponse, error)
 	EnqueueJob(context.Context, *EnqueueJobRequest) (*EnqueueJobResponse, error)
+	GetQueue(context.Context, *GetQueueRequest) (*GetQueueResponse, error)
+	GetJobHistory(context.Context, *GetJobHistoryRequest) (*GetJobHistoryResponse, error)
+	ClearQueue(context.Context, *ClearQueueRequest) (*ClearQueueResponse, error)
 	mustEmbedUnimplementedVideoTranscodingServer()
 }
 
@@ -101,6 +140,15 @@ func (UnimplementedVideoTranscodingServer) GetAllNodes(context.Context, *GetAllN
 }
 func (UnimplementedVideoTranscodingServer) EnqueueJob(context.Context, *EnqueueJobRequest) (*EnqueueJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EnqueueJob not implemented")
+}
+func (UnimplementedVideoTranscodingServer) GetQueue(context.Context, *GetQueueRequest) (*GetQueueResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetQueue not implemented")
+}
+func (UnimplementedVideoTranscodingServer) GetJobHistory(context.Context, *GetJobHistoryRequest) (*GetJobHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetJobHistory not implemented")
+}
+func (UnimplementedVideoTranscodingServer) ClearQueue(context.Context, *ClearQueueRequest) (*ClearQueueResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClearQueue not implemented")
 }
 func (UnimplementedVideoTranscodingServer) mustEmbedUnimplementedVideoTranscodingServer() {}
 func (UnimplementedVideoTranscodingServer) testEmbeddedByValue()                          {}
@@ -166,6 +214,60 @@ func _VideoTranscoding_EnqueueJob_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _VideoTranscoding_GetQueue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetQueueRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoTranscodingServer).GetQueue(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoTranscoding_GetQueue_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoTranscodingServer).GetQueue(ctx, req.(*GetQueueRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VideoTranscoding_GetJobHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetJobHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoTranscodingServer).GetJobHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoTranscoding_GetJobHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoTranscodingServer).GetJobHistory(ctx, req.(*GetJobHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VideoTranscoding_ClearQueue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearQueueRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VideoTranscodingServer).ClearQueue(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: VideoTranscoding_ClearQueue_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VideoTranscodingServer).ClearQueue(ctx, req.(*ClearQueueRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // VideoTranscoding_ServiceDesc is the grpc.ServiceDesc for VideoTranscoding service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -180,6 +282,18 @@ var VideoTranscoding_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EnqueueJob",
 			Handler:    _VideoTranscoding_EnqueueJob_Handler,
+		},
+		{
+			MethodName: "GetQueue",
+			Handler:    _VideoTranscoding_GetQueue_Handler,
+		},
+		{
+			MethodName: "GetJobHistory",
+			Handler:    _VideoTranscoding_GetJobHistory_Handler,
+		},
+		{
+			MethodName: "ClearQueue",
+			Handler:    _VideoTranscoding_ClearQueue_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

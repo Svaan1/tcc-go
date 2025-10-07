@@ -1228,6 +1228,421 @@ func (x *EnqueueJobResponse) GetMessage() string {
 	return ""
 }
 
+// GetQueue related messages
+type GetQueueRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetQueueRequest) Reset() {
+	*x = GetQueueRequest{}
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetQueueRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetQueueRequest) ProtoMessage() {}
+
+func (x *GetQueueRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetQueueRequest.ProtoReflect.Descriptor instead.
+func (*GetQueueRequest) Descriptor() ([]byte, []int) {
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{18}
+}
+
+type JobInfo struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	JobId          string                 `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	InputPath      string                 `protobuf:"bytes,2,opt,name=input_path,json=inputPath,proto3" json:"input_path,omitempty"`
+	OutputPath     string                 `protobuf:"bytes,3,opt,name=output_path,json=outputPath,proto3" json:"output_path,omitempty"`
+	ProfileName    string                 `protobuf:"bytes,4,opt,name=profile_name,json=profileName,proto3" json:"profile_name,omitempty"`
+	Status         string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"` // pending, assigned, processing, completed, failed
+	AssignedNodeId string                 `protobuf:"bytes,6,opt,name=assigned_node_id,json=assignedNodeId,proto3" json:"assigned_node_id,omitempty"`
+	EnqueuedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=enqueued_at,json=enqueuedAt,proto3" json:"enqueued_at,omitempty"`
+	StartedAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
+	CompletedAt    *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *JobInfo) Reset() {
+	*x = JobInfo{}
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobInfo) ProtoMessage() {}
+
+func (x *JobInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobInfo.ProtoReflect.Descriptor instead.
+func (*JobInfo) Descriptor() ([]byte, []int) {
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *JobInfo) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *JobInfo) GetInputPath() string {
+	if x != nil {
+		return x.InputPath
+	}
+	return ""
+}
+
+func (x *JobInfo) GetOutputPath() string {
+	if x != nil {
+		return x.OutputPath
+	}
+	return ""
+}
+
+func (x *JobInfo) GetProfileName() string {
+	if x != nil {
+		return x.ProfileName
+	}
+	return ""
+}
+
+func (x *JobInfo) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *JobInfo) GetAssignedNodeId() string {
+	if x != nil {
+		return x.AssignedNodeId
+	}
+	return ""
+}
+
+func (x *JobInfo) GetEnqueuedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.EnqueuedAt
+	}
+	return nil
+}
+
+func (x *JobInfo) GetStartedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.StartedAt
+	}
+	return nil
+}
+
+func (x *JobInfo) GetCompletedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CompletedAt
+	}
+	return nil
+}
+
+type GetQueueResponse struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	PendingJobs     []*JobInfo             `protobuf:"bytes,1,rep,name=pending_jobs,json=pendingJobs,proto3" json:"pending_jobs,omitempty"`
+	ProcessingJobs  []*JobInfo             `protobuf:"bytes,2,rep,name=processing_jobs,json=processingJobs,proto3" json:"processing_jobs,omitempty"`
+	TotalPending    int32                  `protobuf:"varint,3,opt,name=total_pending,json=totalPending,proto3" json:"total_pending,omitempty"`
+	TotalProcessing int32                  `protobuf:"varint,4,opt,name=total_processing,json=totalProcessing,proto3" json:"total_processing,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GetQueueResponse) Reset() {
+	*x = GetQueueResponse{}
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetQueueResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetQueueResponse) ProtoMessage() {}
+
+func (x *GetQueueResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetQueueResponse.ProtoReflect.Descriptor instead.
+func (*GetQueueResponse) Descriptor() ([]byte, []int) {
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetQueueResponse) GetPendingJobs() []*JobInfo {
+	if x != nil {
+		return x.PendingJobs
+	}
+	return nil
+}
+
+func (x *GetQueueResponse) GetProcessingJobs() []*JobInfo {
+	if x != nil {
+		return x.ProcessingJobs
+	}
+	return nil
+}
+
+func (x *GetQueueResponse) GetTotalPending() int32 {
+	if x != nil {
+		return x.TotalPending
+	}
+	return 0
+}
+
+func (x *GetQueueResponse) GetTotalProcessing() int32 {
+	if x != nil {
+		return x.TotalProcessing
+	}
+	return 0
+}
+
+// GetJobHistory related messages
+type GetJobHistoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Limit         int32                  `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`                                  // Maximum number of jobs to return (0 = all)
+	StatusFilter  string                 `protobuf:"bytes,2,opt,name=status_filter,json=statusFilter,proto3" json:"status_filter,omitempty"` // Filter by status: completed, failed, or empty for all
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetJobHistoryRequest) Reset() {
+	*x = GetJobHistoryRequest{}
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetJobHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetJobHistoryRequest) ProtoMessage() {}
+
+func (x *GetJobHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetJobHistoryRequest.ProtoReflect.Descriptor instead.
+func (*GetJobHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GetJobHistoryRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetJobHistoryRequest) GetStatusFilter() string {
+	if x != nil {
+		return x.StatusFilter
+	}
+	return ""
+}
+
+type GetJobHistoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Jobs          []*JobInfo             `protobuf:"bytes,1,rep,name=jobs,proto3" json:"jobs,omitempty"`
+	TotalCount    int32                  `protobuf:"varint,2,opt,name=total_count,json=totalCount,proto3" json:"total_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetJobHistoryResponse) Reset() {
+	*x = GetJobHistoryResponse{}
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetJobHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetJobHistoryResponse) ProtoMessage() {}
+
+func (x *GetJobHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetJobHistoryResponse.ProtoReflect.Descriptor instead.
+func (*GetJobHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GetJobHistoryResponse) GetJobs() []*JobInfo {
+	if x != nil {
+		return x.Jobs
+	}
+	return nil
+}
+
+func (x *GetJobHistoryResponse) GetTotalCount() int32 {
+	if x != nil {
+		return x.TotalCount
+	}
+	return 0
+}
+
+// ClearQueue related messages
+type ClearQueueRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearQueueRequest) Reset() {
+	*x = ClearQueueRequest{}
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearQueueRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearQueueRequest) ProtoMessage() {}
+
+func (x *ClearQueueRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClearQueueRequest.ProtoReflect.Descriptor instead.
+func (*ClearQueueRequest) Descriptor() ([]byte, []int) {
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{23}
+}
+
+type ClearQueueResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	ClearedCount  int32                  `protobuf:"varint,2,opt,name=cleared_count,json=clearedCount,proto3" json:"cleared_count,omitempty"`
+	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClearQueueResponse) Reset() {
+	*x = ClearQueueResponse{}
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClearQueueResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClearQueueResponse) ProtoMessage() {}
+
+func (x *ClearQueueResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_grpc_proto_transcoding_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClearQueueResponse.ProtoReflect.Descriptor instead.
+func (*ClearQueueResponse) Descriptor() ([]byte, []int) {
+	return file_internal_grpc_proto_transcoding_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ClearQueueResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *ClearQueueResponse) GetClearedCount() int32 {
+	if x != nil {
+		return x.ClearedCount
+	}
+	return 0
+}
+
+func (x *ClearQueueResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_internal_grpc_proto_transcoding_proto protoreflect.FileDescriptor
 
 const file_internal_grpc_proto_transcoding_proto_rawDesc = "" +
@@ -1320,12 +1735,48 @@ const file_internal_grpc_proto_transcoding_proto_rawDesc = "" +
 	"\x12EnqueueJobResponse\x12\x15\n" +
 	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage2\xfd\x01\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\"\x11\n" +
+	"\x0fGetQueueRequest\"\xfc\x02\n" +
+	"\aJobInfo\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x12\x1d\n" +
+	"\n" +
+	"input_path\x18\x02 \x01(\tR\tinputPath\x12\x1f\n" +
+	"\voutput_path\x18\x03 \x01(\tR\n" +
+	"outputPath\x12!\n" +
+	"\fprofile_name\x18\x04 \x01(\tR\vprofileName\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12(\n" +
+	"\x10assigned_node_id\x18\x06 \x01(\tR\x0eassignedNodeId\x12;\n" +
+	"\venqueued_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"enqueuedAt\x129\n" +
+	"\n" +
+	"started_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tstartedAt\x12=\n" +
+	"\fcompleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\"\xda\x01\n" +
+	"\x10GetQueueResponse\x127\n" +
+	"\fpending_jobs\x18\x01 \x03(\v2\x14.transcoding.JobInfoR\vpendingJobs\x12=\n" +
+	"\x0fprocessing_jobs\x18\x02 \x03(\v2\x14.transcoding.JobInfoR\x0eprocessingJobs\x12#\n" +
+	"\rtotal_pending\x18\x03 \x01(\x05R\ftotalPending\x12)\n" +
+	"\x10total_processing\x18\x04 \x01(\x05R\x0ftotalProcessing\"Q\n" +
+	"\x14GetJobHistoryRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\x05R\x05limit\x12#\n" +
+	"\rstatus_filter\x18\x02 \x01(\tR\fstatusFilter\"b\n" +
+	"\x15GetJobHistoryResponse\x12(\n" +
+	"\x04jobs\x18\x01 \x03(\v2\x14.transcoding.JobInfoR\x04jobs\x12\x1f\n" +
+	"\vtotal_count\x18\x02 \x01(\x05R\n" +
+	"totalCount\"\x13\n" +
+	"\x11ClearQueueRequest\"m\n" +
+	"\x12ClearQueueResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12#\n" +
+	"\rcleared_count\x18\x02 \x01(\x05R\fclearedCount\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage2\xed\x03\n" +
 	"\x10VideoTranscoding\x12H\n" +
 	"\x06Stream\x12\x18.transcoding.NodeMessage\x1a .transcoding.OrchestratorMessage(\x010\x01\x12P\n" +
 	"\vGetAllNodes\x12\x1f.transcoding.GetAllNodesRequest\x1a .transcoding.GetAllNodesResponse\x12M\n" +
 	"\n" +
-	"EnqueueJob\x12\x1e.transcoding.EnqueueJobRequest\x1a\x1f.transcoding.EnqueueJobResponseB4Z2github.com/svaan1/tcc-go/internal/grpc/transcodingb\x06proto3"
+	"EnqueueJob\x12\x1e.transcoding.EnqueueJobRequest\x1a\x1f.transcoding.EnqueueJobResponse\x12G\n" +
+	"\bGetQueue\x12\x1c.transcoding.GetQueueRequest\x1a\x1d.transcoding.GetQueueResponse\x12V\n" +
+	"\rGetJobHistory\x12!.transcoding.GetJobHistoryRequest\x1a\".transcoding.GetJobHistoryResponse\x12M\n" +
+	"\n" +
+	"ClearQueue\x12\x1e.transcoding.ClearQueueRequest\x1a\x1f.transcoding.ClearQueueResponseB4Z2github.com/svaan1/tcc-go/internal/grpc/transcodingb\x06proto3"
 
 var (
 	file_internal_grpc_proto_transcoding_proto_rawDescOnce sync.Once
@@ -1339,7 +1790,7 @@ func file_internal_grpc_proto_transcoding_proto_rawDescGZIP() []byte {
 	return file_internal_grpc_proto_transcoding_proto_rawDescData
 }
 
-var file_internal_grpc_proto_transcoding_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_internal_grpc_proto_transcoding_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_internal_grpc_proto_transcoding_proto_goTypes = []any{
 	(*MessageBase)(nil),           // 0: transcoding.MessageBase
 	(*EncodingProfile)(nil),       // 1: transcoding.EncodingProfile
@@ -1359,10 +1810,17 @@ var file_internal_grpc_proto_transcoding_proto_goTypes = []any{
 	(*GetAllNodesResponse)(nil),   // 15: transcoding.GetAllNodesResponse
 	(*EnqueueJobRequest)(nil),     // 16: transcoding.EnqueueJobRequest
 	(*EnqueueJobResponse)(nil),    // 17: transcoding.EnqueueJobResponse
-	(*timestamppb.Timestamp)(nil), // 18: google.protobuf.Timestamp
+	(*GetQueueRequest)(nil),       // 18: transcoding.GetQueueRequest
+	(*JobInfo)(nil),               // 19: transcoding.JobInfo
+	(*GetQueueResponse)(nil),      // 20: transcoding.GetQueueResponse
+	(*GetJobHistoryRequest)(nil),  // 21: transcoding.GetJobHistoryRequest
+	(*GetJobHistoryResponse)(nil), // 22: transcoding.GetJobHistoryResponse
+	(*ClearQueueRequest)(nil),     // 23: transcoding.ClearQueueRequest
+	(*ClearQueueResponse)(nil),    // 24: transcoding.ClearQueueResponse
+	(*timestamppb.Timestamp)(nil), // 25: google.protobuf.Timestamp
 }
 var file_internal_grpc_proto_transcoding_proto_depIdxs = []int32{
-	18, // 0: transcoding.MessageBase.timestamp:type_name -> google.protobuf.Timestamp
+	25, // 0: transcoding.MessageBase.timestamp:type_name -> google.protobuf.Timestamp
 	0,  // 1: transcoding.NodeMessage.base:type_name -> transcoding.MessageBase
 	4,  // 2: transcoding.NodeMessage.register_request:type_name -> transcoding.RegisterRequest
 	6,  // 3: transcoding.NodeMessage.resource_usage_request:type_name -> transcoding.ResourceUsageRequest
@@ -1375,19 +1833,31 @@ var file_internal_grpc_proto_transcoding_proto_depIdxs = []int32{
 	12, // 10: transcoding.OrchestratorMessage.disconnect_response:type_name -> transcoding.DisconnectResponse
 	1,  // 11: transcoding.RegisterRequest.encoding_profiles:type_name -> transcoding.EncodingProfile
 	1,  // 12: transcoding.NodeInfo.encoding_profiles:type_name -> transcoding.EncodingProfile
-	18, // 13: transcoding.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
+	25, // 13: transcoding.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
 	14, // 14: transcoding.GetAllNodesResponse.nodes:type_name -> transcoding.NodeInfo
-	2,  // 15: transcoding.VideoTranscoding.Stream:input_type -> transcoding.NodeMessage
-	13, // 16: transcoding.VideoTranscoding.GetAllNodes:input_type -> transcoding.GetAllNodesRequest
-	16, // 17: transcoding.VideoTranscoding.EnqueueJob:input_type -> transcoding.EnqueueJobRequest
-	3,  // 18: transcoding.VideoTranscoding.Stream:output_type -> transcoding.OrchestratorMessage
-	15, // 19: transcoding.VideoTranscoding.GetAllNodes:output_type -> transcoding.GetAllNodesResponse
-	17, // 20: transcoding.VideoTranscoding.EnqueueJob:output_type -> transcoding.EnqueueJobResponse
-	18, // [18:21] is the sub-list for method output_type
-	15, // [15:18] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	25, // 15: transcoding.JobInfo.enqueued_at:type_name -> google.protobuf.Timestamp
+	25, // 16: transcoding.JobInfo.started_at:type_name -> google.protobuf.Timestamp
+	25, // 17: transcoding.JobInfo.completed_at:type_name -> google.protobuf.Timestamp
+	19, // 18: transcoding.GetQueueResponse.pending_jobs:type_name -> transcoding.JobInfo
+	19, // 19: transcoding.GetQueueResponse.processing_jobs:type_name -> transcoding.JobInfo
+	19, // 20: transcoding.GetJobHistoryResponse.jobs:type_name -> transcoding.JobInfo
+	2,  // 21: transcoding.VideoTranscoding.Stream:input_type -> transcoding.NodeMessage
+	13, // 22: transcoding.VideoTranscoding.GetAllNodes:input_type -> transcoding.GetAllNodesRequest
+	16, // 23: transcoding.VideoTranscoding.EnqueueJob:input_type -> transcoding.EnqueueJobRequest
+	18, // 24: transcoding.VideoTranscoding.GetQueue:input_type -> transcoding.GetQueueRequest
+	21, // 25: transcoding.VideoTranscoding.GetJobHistory:input_type -> transcoding.GetJobHistoryRequest
+	23, // 26: transcoding.VideoTranscoding.ClearQueue:input_type -> transcoding.ClearQueueRequest
+	3,  // 27: transcoding.VideoTranscoding.Stream:output_type -> transcoding.OrchestratorMessage
+	15, // 28: transcoding.VideoTranscoding.GetAllNodes:output_type -> transcoding.GetAllNodesResponse
+	17, // 29: transcoding.VideoTranscoding.EnqueueJob:output_type -> transcoding.EnqueueJobResponse
+	20, // 30: transcoding.VideoTranscoding.GetQueue:output_type -> transcoding.GetQueueResponse
+	22, // 31: transcoding.VideoTranscoding.GetJobHistory:output_type -> transcoding.GetJobHistoryResponse
+	24, // 32: transcoding.VideoTranscoding.ClearQueue:output_type -> transcoding.ClearQueueResponse
+	27, // [27:33] is the sub-list for method output_type
+	21, // [21:27] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_internal_grpc_proto_transcoding_proto_init() }
@@ -1413,7 +1883,7 @@ func file_internal_grpc_proto_transcoding_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_grpc_proto_transcoding_proto_rawDesc), len(file_internal_grpc_proto_transcoding_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

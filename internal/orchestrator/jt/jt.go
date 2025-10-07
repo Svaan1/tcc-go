@@ -52,6 +52,9 @@ type JobTracker interface {
 	GetJobsByNode(ctx context.Context, nodeID uuid.UUID) ([]*JobProgress, error)
 	GetJobsByStatus(ctx context.Context, status JobStatus) ([]*JobProgress, error)
 
+	GetCompletedJobs(ctx context.Context) ([]*JobHistory, error)
+	GetCompletedJobsByStatus(ctx context.Context, status JobStatus) ([]*JobHistory, error)
+
 	CleanupCompletedJobs(ctx context.Context, olderThan time.Duration) error
 	GetStaleJobs(ctx context.Context, timeout time.Duration) ([]*JobProgress, error)
 }

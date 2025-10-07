@@ -125,3 +125,18 @@ func (q *InMemoryJobQueue) GetQueueDepth(ctx context.Context) (int, error) {
 	defer q.mu.RUnlock()
 	return len(q.queue), nil
 }
+
+func (q *InMemoryJobQueue) ClearQueue(ctx context.Context) (int, error) {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	
+	count := len(q.queue)
+	
+	// Clear the queue slice
+	q.queue = make([]*Job, 0)
+	
+	// Clear the jobs map
+	q.jobs = make(map[uuid.UUID]*Job)
+	
+	return count, nil
+}

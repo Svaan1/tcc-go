@@ -78,3 +78,128 @@ func (sv *Server) EnqueueJob(ctx context.Context, req *pb.EnqueueJobRequest) (*p
 		Message: "Job successfully enqueued",
 	}, nil
 }
+
+func (sv *Server) GetQueue(ctx context.Context, req *pb.GetQueueRequest) (*pb.GetQueueResponse, error) {
+	pendingJobs, activeJobs, err := sv.Service.GetQueueInfo(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get queue info: %w", err)
+	}
+
+	pbPendingJobs := make([]*pb.JobInfo, 0, len(pendingJobs))
+	for _, job := range pendingJobs {
+		pbPendingJobs = append(pbPendingJobs, &pb.JobInfo{
+			JobId:       job.ID.String(),
+			InputPath:   job.Params.InputPath,
+			OutputPath:  job.Params.OutputPath,
+			ProfileName: job.Params.ProfileName,
+			Status:      "pending",
+			EnqueuedAt:  timestamppb.New(job.CreatedAt),
+		})
+	}
+
+	pbProcessingJobs := make([]*pb.JobInfo, 0)
+	for nodeID, jobs := range activeJobs {
+		for _, job := range jobs {
+			var status string
+			switch job.Status {
+			case 0:
+				status = "pending"
+			case 1:
+				status = "assigned"
+			case 2:
+				status = "processing"
+			case 3:
+				status = "completed"
+			case 4:
+				status = "failed"
+			default:
+				status = "unknown"
+			}
+
+			jobInfo := &pb.JobInfo{
+				JobId:          job.JobID.String(),
+				Status:         status,
+				AssignedNodeId: nodeID.String(),
+			}
+
+			if job.StartedAt != nil {
+				jobInfo.StartedAt = timestamppb.New(*job.StartedAt)
+			}
+			if job.CompletedAt != nil {
+				jobInfo.CompletedAt = timestamppb.New(*job.CompletedAt)
+			}
+
+			pbProcessingJobs = append(pbProcessingJobs, jobInfo)
+		}
+	}
+
+	return &pb.GetQueueResponse{
+		PendingJobs:     pbPendingJobs,
+		ProcessingJobs:  pbProcessingJobs,
+		TotalPending:    int32(len(pbPendingJobs)),
+		TotalProcessing: int32(len(pbProcessingJobs)),
+	}, nil
+}
+
+func (sv *Server) GetJobHistory(ctx context.Context, req *pb.GetJobHistoryRequest) (*pb.GetJobHistoryResponse, error) {
+	jobs, err := sv.Service.GetJobHistory(ctx, req.StatusFilter, int(req.Limit))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get job history: %w", err)
+	}
+
+	pbJobs := make([]*pb.JobInfo, 0, len(jobs))
+	for _, job := range jobs {
+		var status string
+		switch job.Status {
+		case 0: // JobStatusPending
+			status = "pending"
+		case 1: // JobStatusAssigned
+			status = "assigned"
+		case 2: // JobStatusRunning
+			status = "processing"
+		case 3: // JobStatusCompleted
+			status = "completed"
+		case 4: // JobStatusFailed
+			status = "failed"
+		default:
+			status = "unknown"
+		}
+
+		jobInfo := &pb.JobInfo{
+			JobId:          job.JobID.String(),
+			Status:         status,
+			AssignedNodeId: job.NodeID.String(),
+			StartedAt:      timestamppb.New(job.StartedAt),
+		}
+
+		if job.CompletedAt != nil {
+			jobInfo.CompletedAt = timestamppb.New(*job.CompletedAt)
+		}
+
+		pbJobs = append(pbJobs, jobInfo)
+	}
+
+	return &pb.GetJobHistoryResponse{
+		Jobs:       pbJobs,
+		TotalCount: int32(len(pbJobs)),
+	}, nil
+}
+
+func (sv *Server) ClearQueue(ctx context.Context, req *pb.ClearQueueRequest) (*pb.ClearQueueResponse, error) {
+	count, err := sv.Service.ClearQueue(ctx)
+	if err != nil {
+		return &pb.ClearQueueResponse{
+			Success:      false,
+			ClearedCount: 0,
+			Message:      fmt.Sprintf("Failed to clear queue: %v", err),
+		}, nil
+	}
+
+	log.Printf("Queue cleared, removed %d jobs", count)
+
+	return &pb.ClearQueueResponse{
+		Success:      true,
+		ClearedCount: int32(count),
+		Message:      fmt.Sprintf("Successfully cleared %d jobs from queue", count),
+	}, nil
+}

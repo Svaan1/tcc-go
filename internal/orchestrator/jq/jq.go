@@ -30,4 +30,5 @@ type JobQueue interface {
 	ListJobs(ctx context.Context) ([]*Job, error)
 	GetJob(ctx context.Context, jobID uuid.UUID) (*Job, error)
 	GetQueueDepth(ctx context.Context) (int, error)
+	ClearQueue(ctx context.Context) (int, error)
 }

@@ -257,3 +257,36 @@ func (t *InMemoryJobTracker) GetStaleJobs(ctx context.Context, timeout time.Dura
 
 	return staleJobs, nil
 }
+
+func (t *InMemoryJobTracker) GetCompletedJobs(ctx context.Context) ([]*JobHistory, error) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	var allJobs []*JobHistory
+	for _, histories := range t.completedJobs {
+		for _, history := range histories {
+			// Create copy to prevent race conditions
+			historyCopy := *history
+			allJobs = append(allJobs, &historyCopy)
+		}
+	}
+
+	return allJobs, nil
+}
+
+func (t *InMemoryJobTracker) GetCompletedJobsByStatus(ctx context.Context, status JobStatus) ([]*JobHistory, error) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+
+	var filteredJobs []*JobHistory
+	for _, histories := range t.completedJobs {
+		for _, history := range histories {
+			if history.Status == status {
+				historyCopy := *history
+				filteredJobs = append(filteredJobs, &historyCopy)
+			}
+		}
+	}
+
+	return filteredJobs, nil
+}

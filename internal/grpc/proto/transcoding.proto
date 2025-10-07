@@ -8,6 +8,9 @@ service VideoTranscoding {
     rpc Stream(stream NodeMessage) returns (stream OrchestratorMessage);
     rpc GetAllNodes(GetAllNodesRequest) returns (GetAllNodesResponse);
     rpc EnqueueJob(EnqueueJobRequest) returns (EnqueueJobResponse);
+    rpc GetQueue(GetQueueRequest) returns (GetQueueResponse);
+    rpc GetJobHistory(GetJobHistoryRequest) returns (GetJobHistoryResponse);
+    rpc ClearQueue(ClearQueueRequest) returns (ClearQueueResponse);
 }
 
 message MessageBase {
@@ -124,5 +127,47 @@ message EnqueueJobRequest {
 message EnqueueJobResponse {
     string job_id = 1;
     bool success = 2;
+    string message = 3;
+}
+
+// GetQueue related messages
+message GetQueueRequest {}
+
+message JobInfo {
+    string job_id = 1;
+    string input_path = 2;
+    string output_path = 3;
+    string profile_name = 4;
+    string status = 5; // pending, assigned, processing, completed, failed
+    string assigned_node_id = 6;
+    google.protobuf.Timestamp enqueued_at = 7;
+    google.protobuf.Timestamp started_at = 8;
+    google.protobuf.Timestamp completed_at = 9;
+}
+
+message GetQueueResponse {
+    repeated JobInfo pending_jobs = 1;
+    repeated JobInfo processing_jobs = 2;
+    int32 total_pending = 3;
+    int32 total_processing = 4;
+}
+
+// GetJobHistory related messages
+message GetJobHistoryRequest {
+    int32 limit = 1; // Maximum number of jobs to return (0 = all)
+    string status_filter = 2; // Filter by status: completed, failed, or empty for all
+}
+
+message GetJobHistoryResponse {
+    repeated JobInfo jobs = 1;
+    int32 total_count = 2;
+}
+
+// ClearQueue related messages
+message ClearQueueRequest {}
+
+message ClearQueueResponse {
+    bool success = 1;
+    int32 cleared_count = 2;
     string message = 3;
 }

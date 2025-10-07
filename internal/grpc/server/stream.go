@@ -44,6 +44,12 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 
 			switch payload := msg.Payload.(type) {
 			case *pb.NodeMessage_ResourceUsageRequest:
+				log.Printf("Node %s resource usage update: CPU=%.2f%%, Memory=%.2f%%, Disk=%.2f%%",
+					nodeID,
+					payload.ResourceUsageRequest.GetCpuPercent(),
+					payload.ResourceUsageRequest.GetMemoryPercent(),
+					payload.ResourceUsageRequest.GetDiskPercent(),
+				)
 				sv.Service.UpdateNodeMetrics(context.TODO(),
 					payload.ResourceUsageRequest.NodeId,
 					&metrics.ResourceUsage{
@@ -61,35 +67,59 @@ func (sv *Server) Stream(stream pb.VideoTranscoding_StreamServer) error {
 				)
 
 				if !payload.JobAssignmentResponse.GetAccepted() {
+					log.Printf("Node %s rejected job %s, marking for reassignment",
+						nodeID,
+						payload.JobAssignmentResponse.GetJobId(),
+					)
 					sv.Service.RejectJob(context.TODO(),
 						payload.JobAssignmentResponse.GetJobId(),
 						payload.JobAssignmentResponse.GetMessage(),
 					)
+				} else {
+					log.Printf("Node %s accepted job %s, starting execution",
+						nodeID,
+						payload.JobAssignmentResponse.GetJobId(),
+					)
 				}
 			case *pb.NodeMessage_JobCompletionRequest:
+				log.Printf("Node %s job completion for job %s: success=%t, message=%s",
+					nodeID,
+					payload.JobCompletionRequest.GetJobId(),
+					payload.JobCompletionRequest.GetSuccess(),
+					payload.JobCompletionRequest.GetMessage(),
+				)
 				sv.Service.CompleteJob(context.TODO(),
 					payload.JobCompletionRequest.GetJobId(),
 					payload.JobCompletionRequest.GetSuccess(),
 					payload.JobCompletionRequest.GetMessage(),
 				)
 			case *pb.NodeMessage_DisconnectRequest:
+				log.Printf("Node %s requested disconnect", nodeID)
 				nodeConn.SendDisconnectResponse(&pb.DisconnectResponse{Acknowledged: true})
 				return nil
+			default:
+				log.Printf("Node %s sent unknown message type", nodeID)
 			}
 		}
 	}
 }
 
 func (sv *Server) registerNode(ctx context.Context, stream pb.VideoTranscoding_StreamServer) (nodeID uuid.UUID, nodeConn *NodeConn, err error) {
+	log.Println("Waiting for node registration request")
 	msg, err := stream.Recv()
 	if err != nil {
+		log.Printf("Error receiving initial message: %v", err)
 		return uuid.Nil, nil, fmt.Errorf("error receiving initial message: %v", err)
 	}
 
 	register := msg.GetRegisterRequest()
 	if register == nil {
+		log.Println("Received non-RegisterRequest message during registration")
 		return uuid.Nil, nil, fmt.Errorf("expected RegisterRequest but got different message type")
 	}
+
+	log.Printf("Received registration request from node: %s with %d encoding profiles",
+		register.Name, len(register.EncodingProfiles))
 
 	// Parse the encoding profile structs
 	var profiles []ffmpeg.EncodingProfile
@@ -107,8 +137,11 @@ func (sv *Server) registerNode(ctx context.Context, stream pb.VideoTranscoding_S
 
 	nodeID, err = sv.Service.RegisterNode(ctx, register.Name, profiles)
 	if err != nil {
+		log.Printf("Failed to register node %s: %v", register.Name, err)
 		return uuid.Nil, nil, fmt.Errorf("failed to register node: %v", err)
 	}
+
+	log.Printf("Successfully registered node %s with ID %s", register.Name, nodeID)
 
 	nodeConn = newNodeConn(nodeID, stream)
 
@@ -117,17 +150,21 @@ func (sv *Server) registerNode(ctx context.Context, stream pb.VideoTranscoding_S
 	sv.mu.Unlock()
 
 	if err := nodeConn.SendRegisterResponse(); err != nil {
+		log.Printf("Error sending registration response to %s: %v", nodeID, err)
 		return uuid.Nil, nil, fmt.Errorf("error sending registration response to %s: %v", nodeID, err)
 	}
+
+	log.Printf("Sent registration response to node %s", nodeID)
 
 	return nodeID, nodeConn, nil
 }
 
 func (sv *Server) unregisterNode(ctx context.Context, nodeID uuid.UUID) {
+	log.Printf("Unregistering node %s", nodeID.String())
 	sv.mu.Lock()
 	sv.Service.UnregisterNode(ctx, nodeID)
 	delete(sv.NodeConns, nodeID)
 	sv.mu.Unlock()
 
-	log.Printf("Node %s disconnected", nodeID.String())
+	log.Printf("Node %s disconnected and removed from registry", nodeID.String())
 }
